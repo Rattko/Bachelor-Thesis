@@ -1,45 +1,108 @@
-from sklearn.datasets import load_boston
-from sklearn.metrics import mean_squared_error
+from sklearn.datasets import load_breast_cancer
 from sklearn.model_selection import train_test_split
-from sklearn.tree import DecisionTreeRegressor
+from sklearn.metrics import accuracy_score, precision_score, recall_score, average_precision_score
 
-# TODO: Come up with a better name
+from autosklearn.metrics import precision, recall, f1, roc_auc, make_scorer
+from autosklearn.classification import AutoSklearnClassifier
+
+import pandas as pd
+
 # TODO: Add documentation comments
-class MagicBox:
-    def __init__(self, model, **params):
-        self.model = model
-        self.estimator = None
-        self.prediction = None
+class AutoML:
+    """
+    """
 
+    def __init__(self, model, **params):
+        """
+        """
+
+        self.model = model
+        self.models = None
         self.set_params(**params)
 
     def fit(self, X, y):
-        self.estimator = self.model.fit(X, y)
+        """
+        """
+
+        self.model.fit(X, y)
+        self.__get_models()
 
     def predict(self, X):
-        self.prediction = self.estimator.predict(X)
-        return self.prediction
+        """
+        """
+
+        return self.model.predict(X)
 
     def score(self, X, y):
-        if self.prediction is None:
-            self.predict(X)
+        """
+        """
 
-        print(f'RMSE = {mean_squared_error(y, self.prediction, squared=False)}')
-        print(f'R2 = {self.estimator.score(X, y)}')
+        preds = self.predict(X)
 
-    def evaluate(self):
-        pass
+        accuracy = accuracy_score(y, preds)
+        precision = precision_score(y, preds)
+        recall = recall_score(y, preds)
+
+        return [accuracy, precision, recall]
 
     def get_params(self):
+        """
+        """
+
         return self.model.get_params()
 
     def set_params(self, **params):
+        """
+        """
+
         self.model.set_params(**params)
 
-if __name__ == '__main__':
-    X, y = load_boston(return_X_y=True)
+    def __get_models(self):
+        """
+        """
+
+        results = pd.DataFrame.from_dict(self.model.cv_results_).set_index('rank_test_scores')
+        results = results.rename({'param_classifier:__choice__': 'classifier'}, axis=1)
+        results = results[results['status'] == 'Success'].sort_index()
+
+        results['hyperparams'] = self.__extract_hyperparams(results)
+
+        cols = ['classifier', 'hyperparams']
+        cols.extend([key for key in results.keys() if key.startswith('metric_')])
+
+        self.models = results[cols]
+
+    def __extract_hyperparams(self, results):
+        """
+        """
+
+        return [
+            {
+                key.split(':')[2] : value
+                for key, value in row.items()
+                if key.startswith('classifier:') and not key.endswith('__choice__')
+            } for row in results['params']
+        ]
+
+
+def main():
+    X, y = load_breast_cancer(return_X_y=True)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=1)
 
-    magic_box = MagicBox(DecisionTreeRegressor(), **{"random_state": 1})
-    magic_box.fit(X_train, y_train)
-    magic_box.score(X_test, y_test)
+    pr_auc = make_scorer(name='pr_auc', score_func=average_precision_score)
+
+    automl = AutoML(
+        AutoSklearnClassifier(), **{
+            'scoring_functions': [precision, recall, f1, roc_auc, pr_auc],
+            'time_left_for_this_task': 30,
+            'per_run_time_limit': 10,
+            'ensemble_size': 1,
+            'n_jobs': -1
+        }
+    )
+
+    automl.fit(X_train, y_train)
+    print(automl.score(X_test, y_test))
+
+if __name__ == '__main__':
+    main()
