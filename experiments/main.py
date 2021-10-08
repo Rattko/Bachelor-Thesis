@@ -1,10 +1,12 @@
 from sklearn.datasets import load_breast_cancer
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_auc_score, average_precision_score
+from sklearn.metrics import roc_curve, precision_recall_curve
 
 from autosklearn.metrics import precision, recall, f1, roc_auc, make_scorer
 from autosklearn.classification import AutoSklearnClassifier
 
+import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import mlflow
@@ -12,7 +14,6 @@ import mlflow
 # TODO: Add documentation comments
 # TODO: Baseline for base datasets
 # TODO: Basic data preprocessing
-# TODO: Log graphs of ROC and PR curves
 # TODO: Remove preprocessing steps from AutoSklearn
 # TODO: Update AutoSklearn's hyperparameters
 # TODO: Intel Acceleration
@@ -112,6 +113,11 @@ class AutoML:
             ))
         )
 
+        # Log ROC and PR curves obtained on the testing dataset into MLFlow
+        self.__plot_pr_curve(y, preds_proba, pr_auc_score)
+        self.__plot_roc_curve(y, preds_proba, roc_auc_score)
+        self.__plot_roc_curve(y, preds_proba, roc_auc_score, max_fpr=0.25)
+
     def get_params(self):
         """
         """
@@ -167,6 +173,55 @@ class AutoML:
             row.rename(lambda x: x.replace('metric_', '')).to_dict()
             for _, row in results[metric_cols].iterrows()
         ]
+
+    def __plot_pr_curve(self, y, preds_proba, score):
+        """
+        """
+
+        precision, recall, thresholds = precision_recall_curve(y, preds_proba[:, 1])
+
+        fig = plt.figure()
+        plt.plot(recall, precision, 'r-', label=f'AUC = {score:.3f}')
+
+        plt.title('Precision Recall Curve')
+        plt.xlabel('Recall')
+        plt.ylabel('Precision')
+        plt.legend(loc='lower left')
+
+        plt.grid()
+
+        mlflow.log_figure(fig, 'graph_pr_curve.png')
+        mlflow.log_text('\n'.join(map(str, thresholds)), 'thresholds_pr_curve.txt')
+
+    def __plot_roc_curve(self, y, preds_proba, score, max_fpr=None):
+        """
+        """
+
+        curve_name = 'roc_curve' if max_fpr is None else 'partial_roc_curve'
+        fpr, tpr, thresholds = roc_curve(y, preds_proba[:, 1])
+
+        if max_fpr is not None:
+            stop = np.searchsorted(fpr, max_fpr, 'right')
+            tpr_at_max_fpr = np.interp(
+                max_fpr, [fpr[stop - 1], fpr[stop]], [tpr[stop - 1], tpr[stop]]
+            )
+
+            fpr = np.append(fpr[:stop], max_fpr)
+            tpr = np.append(tpr[:stop], tpr_at_max_fpr)
+            thresholds = thresholds[0:len(fpr)]
+
+        fig = plt.figure()
+        plt.plot(fpr, tpr, 'r-', label=f'AUC = {score:.3f}')
+
+        plt.title('Receiver Operating Characteristic Curve')
+        plt.xlabel('False Positive Rate')
+        plt.ylabel('True Positive Rate')
+        plt.legend(loc='lower right')
+
+        plt.grid()
+
+        mlflow.log_figure(fig, f'graph_{curve_name}.png')
+        mlflow.log_text('\n'.join(map(str, thresholds)), f'thresholds_{curve_name}.txt')
 
     def __log_model_artifacts(self):
         """
