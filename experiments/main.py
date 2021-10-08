@@ -15,7 +15,6 @@ import mlflow
 # TODO: Baseline for base datasets
 # TODO: Basic data preprocessing
 # TODO: Remove preprocessing steps from AutoSklearn
-# TODO: Update AutoSklearn's hyperparameters
 # TODO: Intel Acceleration
 # TODO: Split AutoSklearn and MLFlow functionality using decorators
 
@@ -244,8 +243,14 @@ def main():
             'time_left_for_this_task': 30, # In seconds
             'per_run_time_limit': 10, # In seconds
             'memory_limit': 4096, # In megabytes
-            'include_preprocessors': ['no_preprocessing'],
-            'exclude_estimators': ['mlp'],
+            'include': {
+                'feature_preprocessor': ['no_preprocessing']
+            },
+            'exclude': {
+                'classifier': ['mlp']
+            },
+            'resampling_strategy': 'cv',
+            'resampling_strategy_arguments': {'folds': 5},
             'metric': roc_auc, # Metric used to evaluate and produce the final ensemble
             'scoring_functions': [
                 precision, recall, f1, pr_auc, roc_auc, partial_roc_auc
