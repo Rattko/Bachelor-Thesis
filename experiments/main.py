@@ -7,12 +7,12 @@ from autosklearn.metrics import precision, recall, f1, roc_auc, make_scorer
 from autosklearn.classification import AutoSklearnClassifier
 
 import pandas as pd
+import numpy as np
 import mlflow
 
 # TODO: Add documentation comments
 # TODO: Baseline for base datasets
 # TODO: Basic data preprocessing
-# TODO: Pickle the best model
 # TODO: Log graphs of ROC and PR curves
 # TODO: Remove preprocessing steps from AutoSklearn
 # TODO: Update AutoSklearn's hyperparameters
@@ -29,10 +29,12 @@ class AutoML:
         self.models = None
         self.set_params(**params)
 
+        # Initialize MLFlow
         mlflow.set_tracking_uri('http://127.0.0.1:5000')
         mlflow.set_experiment('Breast Cancer Dataset')
         mlflow.start_run(run_name='Baseline')
 
+        # Log AutoSklearn's hyperparameters into MLFlow
         mlflow.log_params(self.get_params())
 
     def fit(self, X, y):
@@ -40,10 +42,20 @@ class AutoML:
         """
 
         self.model.fit(X, y)
+        self.model.refit(X, y)
+
         self.__get_models()
 
-        mlflow.log_metrics(self.models.iloc[0]['metrics'])
-        self.__log_artifacts()
+        # Pickle the trained AutoSklearn model into MLFlow
+        mlflow.sklearn.log_model(
+            self.model, 'model',
+            registered_model_name='Breast Cancer Dataset - Baseline',
+            signature=mlflow.models.signature.infer_signature(X, pd.Series(y, dtype='float64')),
+            input_example=X.head()
+        )
+
+        # Log model name, hyperparameters and metrics of all trained models into MLFlow
+        self.__log_model_artifacts()
 
     def predict(self, X):
         """
@@ -93,9 +105,9 @@ class AutoML:
         results = results.sort_values('pivot').drop('pivot', axis=1)
 
         results['hyperparams'] = self.__extract_hyperparams(results)
-        results['metrics'] = self.__extract_metrics(results)
+        results['cross_val_metrics'] = self.__extract_metrics(results)
 
-        self.models = results[['classifier', 'hyperparams', 'metrics']]
+        self.models = results[['classifier', 'hyperparams', 'cross_val_metrics']]
 
     def __extract_hyperparams(self, results):
         """
@@ -119,7 +131,7 @@ class AutoML:
             for _, row in results[metric_cols].iterrows()
         ]
 
-    def __log_artifacts(self):
+    def __log_model_artifacts(self):
         """
         """
 
@@ -168,7 +180,7 @@ def main():
     )
 
     automl.fit(X_train, y_train)
-    print(automl.score(X_test, y_test))
+    automl.score(X_test, y_test)
 
 if __name__ == '__main__':
     main()
