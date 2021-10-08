@@ -1,6 +1,5 @@
 from sklearn.datasets import load_breast_cancer
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, precision_score, recall_score
 from sklearn.metrics import roc_auc_score, average_precision_score
 
 from autosklearn.metrics import precision, recall, f1, roc_auc, make_scorer
@@ -17,6 +16,23 @@ import mlflow
 # TODO: Remove preprocessing steps from AutoSklearn
 # TODO: Update AutoSklearn's hyperparameters
 # TODO: Intel Acceleration
+# TODO: Split AutoSklearn and MLFlow functionality using decorators
+
+pr_auc = make_scorer(
+    name='pr_auc',
+    score_func=average_precision_score,
+    greater_is_better=True,
+    needs_threshold=True
+)
+
+partial_roc_auc = make_scorer(
+    name='partial_roc_auc',
+    score_func=roc_auc_score,
+    greater_is_better=True,
+    needs_threshold=True,
+    **{'max_fpr': 0.25}
+)
+
 class AutoML:
     """
     """
@@ -63,17 +79,38 @@ class AutoML:
 
         return self.model.predict(X)
 
+    def predict_proba(self, X):
+        """
+        """
+
+        return self.model.predict_proba(X)
+
     def score(self, X, y):
         """
         """
 
         preds = self.predict(X)
+        preds_proba = self.predict_proba(X)
 
-        accuracy = accuracy_score(y, preds)
-        precision = precision_score(y, preds)
-        recall = recall_score(y, preds)
+        precision_score = precision(y, preds)
+        recall_score = recall(y, preds)
+        f1_score = f1(y, preds)
 
-        return [accuracy, precision, recall]
+        pr_auc_score = pr_auc(y, preds_proba)
+        roc_auc_score = roc_auc(y, preds_proba)
+        partial_roc_auc_score = partial_roc_auc(y, preds_proba)
+
+        scores = [
+            precision_score, recall_score, f1_score,
+            pr_auc_score, roc_auc_score, partial_roc_auc_score
+        ]
+
+        # Log metrics of the best model obtained on the testing dataset into MLFlow
+        mlflow.log_metrics(
+            dict(zip(
+                ['precision', 'recall', 'f1', 'pr_auc', 'roc_auc', 'partial_roc_auc'], scores
+            ))
+        )
 
     def get_params(self):
         """
@@ -147,21 +184,6 @@ def main():
         X, y, test_size=0.25, stratify=y, random_state=1
     )
 
-    pr_auc = make_scorer(
-        name='pr_auc',
-        score_func=average_precision_score,
-        greater_is_better=True,
-        needs_threshold=True
-    )
-
-    partial_roc_auc = make_scorer(
-        name='partial_roc_auc',
-        score_func=roc_auc_score,
-        greater_is_better=True,
-        needs_threshold=True,
-        **{'max_fpr': 0.25}
-    )
-
     automl = AutoML(
         AutoSklearnClassifier(), **{
             'time_left_for_this_task': 30, # In seconds
@@ -170,7 +192,9 @@ def main():
             'include_preprocessors': ['no_preprocessing'],
             'exclude_estimators': ['mlp'],
             'metric': roc_auc, # Metric used to evaluate and produce the final ensemble
-            'scoring_functions': [precision, recall, f1, roc_auc, partial_roc_auc, pr_auc],
+            'scoring_functions': [
+                precision, recall, f1, pr_auc, roc_auc, partial_roc_auc
+            ],
             'ensemble_size': 1,
             'ensemble_nbest': 1,
             'initial_configurations_via_metalearning': 0,
