@@ -1,9 +1,7 @@
 from sklearn.datasets import load_breast_cancer
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import roc_auc_score, average_precision_score
 from sklearn.metrics import roc_curve, precision_recall_curve
 
-from autosklearn.metrics import precision, recall, f1, roc_auc, make_scorer
 from autosklearn.classification import AutoSklearnClassifier
 
 import matplotlib.pyplot as plt
@@ -12,6 +10,8 @@ import numpy as np
 import mlflow
 
 from argparse import ArgumentParser
+
+from metrics import precision, recall, f1, pr_auc, roc_auc, partial_roc_auc
 
 # TODO: Add documentation comments
 # TODO: Baseline for base datasets
@@ -34,21 +34,6 @@ parser.add_argument('--memory', type=int, default=None)
 
 # Common switches
 parser.add_argument('--random_state', type=int, default=1)
-
-pr_auc = make_scorer(
-    name='pr_auc',
-    score_func=average_precision_score,
-    greater_is_better=True,
-    needs_threshold=True
-)
-
-partial_roc_auc = make_scorer(
-    name='partial_roc_auc',
-    score_func=roc_auc_score,
-    greater_is_better=True,
-    needs_threshold=True,
-    **{'max_fpr': 0.25}
-)
 
 class AutoML:
     """
