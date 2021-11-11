@@ -11,6 +11,7 @@ import mlflow
 
 from argparse import ArgumentParser
 
+from exceptions import NoModelError
 from metrics import precision, recall, f1, pr_auc, roc_auc, partial_roc_auc
 
 # TODO: Add documentation comments
@@ -140,8 +141,11 @@ class AutoML:
         results = results[results['status'] == 'Success'].sort_index()
 
         # Get 'config_id' of a model which ended up in the ensemble and then get its hyperparams
-        config_id = self.model.leaderboard(include='config_id').iloc[0]['config_id']
-        params = dict(self.model.automl_.runhistory_.ids_config[config_id])
+        try:
+            config_id = self.model.leaderboard(include='config_id').iloc[0]['config_id']
+            params = dict(self.model.automl_.runhistory_.ids_config[config_id])
+        except KeyError as _:
+            raise NoModelError('No model was trained within a given time limit') from None
 
         # Move the entry with a model which ended up in the ensemble to the very top
         results['pivot'] = range(1, len(results) + 1)
