@@ -11,12 +11,29 @@ import pandas as pd
 import numpy as np
 import mlflow
 
+from argparse import ArgumentParser
+
 # TODO: Add documentation comments
 # TODO: Baseline for base datasets
 # TODO: Basic data preprocessing
 # TODO: Remove preprocessing steps from AutoSklearn
 # TODO: Intel Acceleration
 # TODO: Split AutoSklearn and MLFlow functionality using decorators
+
+parser = ArgumentParser()
+
+# MLFlow related switches
+parser.add_argument('--tracking_uri', type=str, default='http://127.0.0.1:5000')
+parser.add_argument('--experiment', type=str, default='Testing Dataset')
+parser.add_argument('--run_name', type=str, default='Test Run')
+
+# AutoSklearn related switches
+parser.add_argument('--total_time', type=int, default=30)
+parser.add_argument('--time_per_run', type=int, default=10)
+parser.add_argument('--memory', type=int, default=None)
+
+# Common switches
+parser.add_argument('--random_state', type=int, default=1)
 
 pr_auc = make_scorer(
     name='pr_auc',
@@ -37,7 +54,7 @@ class AutoML:
     """
     """
 
-    def __init__(self, model, **params):
+    def __init__(self, model, args, **params):
         """
         """
 
@@ -46,9 +63,9 @@ class AutoML:
         self.set_params(**params)
 
         # Initialize MLFlow
-        mlflow.set_tracking_uri('http://127.0.0.1:5000')
-        mlflow.set_experiment('Breast Cancer Dataset')
-        mlflow.start_run(run_name='Baseline')
+        mlflow.set_tracking_uri(args.tracking_uri)
+        mlflow.set_experiment(args.experiment)
+        mlflow.start_run(run_name=args.run_name)
 
         # Log AutoSklearn's hyperparameters into MLFlow
         mlflow.log_params(self.get_params())
@@ -65,7 +82,7 @@ class AutoML:
         # Pickle the trained AutoSklearn model into MLFlow
         mlflow.sklearn.log_model(
             self.model, 'model',
-            registered_model_name='Breast Cancer Dataset - Baseline',
+            registered_model_name=f'{args.experiment} - {args.run_name}',
             signature=mlflow.models.signature.infer_signature(X, pd.Series(y, dtype='float64')),
             input_example=X.head()
         )
@@ -230,19 +247,18 @@ class AutoML:
         for index, (_, model) in zip(range(n_models), self.models.iterrows()):
             mlflow.log_dict(dict(model), f'{index:0>{len(str(n_models))}}.json')
 
-
-def main():
+def main(args):
     X, y = load_breast_cancer(return_X_y=True, as_frame=True)
 
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.25, stratify=y, random_state=1
+        X, y, test_size=0.25, stratify=y, random_state=args.random_state
     )
 
     automl = AutoML(
-        AutoSklearnClassifier(), **{
-            'time_left_for_this_task': 30, # In seconds
-            'per_run_time_limit': 10, # In seconds
-            'memory_limit': 4096, # In megabytes
+        AutoSklearnClassifier(), args, **{
+            'time_left_for_this_task': args.total_time, # In seconds
+            'per_run_time_limit': args.time_per_run, # In seconds
+            'memory_limit': args.memory, # In megabytes
             'include': {
                 'feature_preprocessor': ['no_preprocessing']
             },
@@ -259,7 +275,7 @@ def main():
             'ensemble_nbest': 1,
             'initial_configurations_via_metalearning': 0,
             'n_jobs': -1,
-            'seed': 1
+            'seed': args.random_state
         }
     )
 
@@ -267,4 +283,5 @@ def main():
     automl.score(X_test, y_test)
 
 if __name__ == '__main__':
-    main()
+    args = parser.parse_args()
+    main(args)
