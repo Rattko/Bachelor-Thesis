@@ -73,7 +73,10 @@ class AutoML:
             input_example=X.head()
         )
 
-        # Log model name, hyperparameters and metrics of all trained models into MLFlow
+        # Log a number of trained models into MLFlow
+        mlflow.log_metric('models_trained', len(self.models))
+
+        # Log a model name, hyperparameters and metrics of all trained models into MLFlow
         self.__log_model_artifacts()
 
     def predict(self, X):
