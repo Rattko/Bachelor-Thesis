@@ -213,10 +213,13 @@ class AutoML:
             tpr_at_max_fpr = np.interp(
                 max_fpr, [fpr[stop - 1], fpr[stop]], [tpr[stop - 1], tpr[stop]]
             )
+            threshold_at_max_fpr = np.interp(
+                max_fpr, [fpr[stop - 1], fpr[stop]], [thresholds[stop - 1], thresholds[stop]]
+            )
 
             fpr = np.append(fpr[:stop], max_fpr)
             tpr = np.append(tpr[:stop], tpr_at_max_fpr)
-            thresholds = thresholds[0:len(fpr)]
+            thresholds = np.append(thresholds[:stop], threshold_at_max_fpr)
 
         fig = plt.figure()
         plt.plot(fpr, tpr, 'r-', label=f'AUC = {score:.3f}')
