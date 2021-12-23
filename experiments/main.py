@@ -223,10 +223,16 @@ class AutoML:
 
         fig = plt.figure()
         plt.plot(fpr, tpr, 'r-', label=f'AUC = {score:.3f}')
+        plt.plot(
+            np.linspace(0, fpr[-1], num=100),
+            np.linspace(0, tpr[-1], num=100),
+            'k-.', label=f'AUC = {0.5:.3f}'
+        )
 
         plt.title('Receiver Operating Characteristic Curve')
         plt.xlabel('False Positive Rate')
         plt.ylabel('True Positive Rate')
+        plt.xscale('log')
         plt.legend(loc='lower right')
 
         plt.grid()
