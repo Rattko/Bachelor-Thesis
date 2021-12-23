@@ -4,8 +4,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.metrics import precision_recall_curve, roc_curve
 
-from exceptions import NoModelError
-from metrics import precision, recall, f1, pr_auc, roc_auc, partial_roc_auc
+from experiments.exceptions import NoModelError
+from experiments.metrics import precision, recall, f1, pr_auc, roc_auc, partial_roc_auc
 
 class AutoML:
     """

@@ -5,8 +5,8 @@ from autosklearn.classification import AutoSklearnClassifier
 from sklearn.datasets import load_breast_cancer
 from sklearn.model_selection import train_test_split
 
-from automl import AutoML
-from metrics import precision, recall, f1, pr_auc, roc_auc, partial_roc_auc
+from core.automl import AutoML
+from experiments.metrics import precision, recall, f1, pr_auc, roc_auc, partial_roc_auc
 
 # TODO: Add documentation comments
 # TODO: Baseline for base datasets
