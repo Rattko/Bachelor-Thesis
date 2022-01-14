@@ -4,8 +4,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.metrics import precision_recall_curve, roc_curve
 
-from experiments.exceptions import NoModelError
-from experiments.metrics import precision, recall, f1, pr_auc, roc_auc, partial_roc_auc
+from core.exceptions import NoModelError
+from core.metrics import precision, recall, f1, pr_auc, roc_auc, partial_roc_auc
 
 class AutoML:
     """
@@ -76,7 +76,7 @@ class AutoML:
 
         pr_auc_score = pr_auc(y, preds_proba)
         roc_auc_score = roc_auc(y, preds_proba)
-        partial_roc_auc_score = partial_roc_auc(y, preds_proba)
+        partial_roc_auc_score = partial_roc_auc(self.args.imbalance_ratio)(y, preds_proba)
 
         scores = [
             precision_score, recall_score, f1_score,
