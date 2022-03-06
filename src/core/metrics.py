@@ -1,5 +1,6 @@
-from autosklearn.metrics import precision, recall, f1, make_scorer, Scorer
-from sklearn.metrics import average_precision_score, roc_auc_score
+from autosklearn.metrics import accuracy, balanced_accuracy, f1, log_loss
+from autosklearn.metrics import make_scorer, precision, recall, Scorer
+from sklearn.metrics import average_precision_score, matthews_corrcoef, roc_auc_score
 
 pr_auc = make_scorer(
     name='pr_auc',
@@ -8,6 +9,15 @@ pr_auc = make_scorer(
     worst_possible_result=0.0,
     greater_is_better=True,
     needs_threshold=True
+)
+
+matthews_corr_coef = make_scorer(
+    name='matthews_corr_coef',
+    score_func=matthews_corrcoef,
+    optimum=1.0,
+    worst_possible_result=-1.0,
+    greater_is_better=True,
+    needs_threshold=False
 )
 
 roc_auc = make_scorer(
