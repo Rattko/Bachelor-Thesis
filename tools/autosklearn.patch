@@ -1,0 +1,15 @@
+--- classification.old.py	2022-03-06 19:32:00.000000000 +0100
++++ classification.py	2022-03-06 19:32:42.000000000 +0100
+@@ -307,9 +307,9 @@
+                     dataset_properties=default_dataset_properties,
+                     random_state=self.random_state)
+             ],
+-            [
+-                "balancing", Balancing(random_state=self.random_state)
+-            ],
++#             [
++#                 "balancing", Balancing(random_state=self.random_state)
++#             ],
+             [
+                 "feature_preprocessor", FeaturePreprocessorChoice(
+                     dataset_properties=default_dataset_properties,
