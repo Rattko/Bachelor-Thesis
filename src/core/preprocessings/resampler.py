@@ -2,9 +2,13 @@ import itertools
 from typing import Any, Generator
 
 import numpy as np
+from imblearn.base import BaseSampler
 
 class Resampler:
-    _hyperparams = {}
+    _hyperparams: dict[str, Any] = {}
+
+    def __init__(self, **kwargs: Any) -> None:
+        self.resampler: BaseSampler = None
 
     @classmethod
     def hyperparams(cls) -> Generator[dict[str, Any], None, None]:
@@ -14,4 +18,7 @@ class Resampler:
             yield dict(zip(keys, conf))
 
     def fit_resample(self, data: np.ndarray, target: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-        raise NotImplementedError()
+        return self.resampler.fit_resample(data, target)
+
+    def get_params(self, deep: bool = True) -> dict[str, Any]:
+        return self.resampler.get_params(deep)
