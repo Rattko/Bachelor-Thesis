@@ -2,7 +2,9 @@ from typing import Any
 
 from imblearn.under_sampling import NearMiss
 
+from core.logger import Logger
 from core.preprocessings.resampler import Resampler
+
 
 class NearMissResampler(Resampler):
     _hyperparams = {
@@ -12,9 +14,10 @@ class NearMissResampler(Resampler):
     }
 
     def __init__(
-        self, sampling_strategy: float, n_neighbors: int, version: int, **kwargs: Any
+        self, logger: Logger, sampling_strategy: float,
+        n_neighbors: int, version: int, **kwargs: Any
     ) -> None:
-        super().__init__()
+        super().__init__(logger)
 
         self.resampler = NearMiss(
             sampling_strategy=sampling_strategy,
@@ -27,3 +30,5 @@ class NearMissResampler(Resampler):
             version=version,
             n_jobs=-1
         )
+
+        self._logger.log_params('imblearn', self.get_params())

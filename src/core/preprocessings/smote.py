@@ -1,6 +1,8 @@
 from imblearn.over_sampling import SMOTE
 
+from core.logger import Logger
 from core.preprocessings.resampler import Resampler
+
 
 class SmoteResampler(Resampler):
     _hyperparams = {
@@ -8,8 +10,10 @@ class SmoteResampler(Resampler):
         'k_neighbors': [5, 10]
     }
 
-    def __init__(self, sampling_strategy: float, k_neighbors: int, random_state: int) -> None:
-        super().__init__()
+    def __init__(
+        self, logger: Logger, sampling_strategy: float, k_neighbors: int, random_state: int
+    ) -> None:
+        super().__init__(logger)
 
         self.resampler = SMOTE(
             sampling_strategy=sampling_strategy,
@@ -17,3 +21,5 @@ class SmoteResampler(Resampler):
             random_state=random_state,
             n_jobs=-1
         )
+
+        self._logger.log_params('imblearn', self.get_params())

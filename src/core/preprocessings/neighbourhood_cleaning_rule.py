@@ -2,7 +2,9 @@ from typing import Any
 
 from imblearn.under_sampling import NeighbourhoodCleaningRule
 
+from core.logger import Logger
 from core.preprocessings.resampler import Resampler
+
 
 class NeighbourhoodCleaningRuleResampler(Resampler):
     _hyperparams = {
@@ -13,10 +15,10 @@ class NeighbourhoodCleaningRuleResampler(Resampler):
     }
 
     def __init__(
-        self, sampling_strategy: str, n_neighbors: int,
+        self, logger: Logger, sampling_strategy: str, n_neighbors: int,
         kind_sel: str, threshold_cleaning: float, **kwargs: Any
     ) -> None:
-        super().__init__()
+        super().__init__(logger)
 
         self.resampler = NeighbourhoodCleaningRule(
             sampling_strategy=sampling_strategy,
@@ -25,3 +27,5 @@ class NeighbourhoodCleaningRuleResampler(Resampler):
             threshold_cleaning=threshold_cleaning,
             n_jobs=-1
         )
+
+        self._logger.log_params('imblearn', self.get_params())

@@ -2,7 +2,9 @@ from typing import Any
 
 from imblearn.under_sampling import AllKNN
 
+from core.logger import Logger
 from core.preprocessings.resampler import Resampler
+
 
 class AllKnnResampler(Resampler):
     _hyperparams = {
@@ -12,9 +14,10 @@ class AllKnnResampler(Resampler):
     }
 
     def __init__(
-        self, sampling_strategy: str, n_neighbors: int, kind_sel: str, **kwargs: Any
+        self, logger: Logger, sampling_strategy: str,
+        n_neighbors: int, kind_sel: str, **kwargs: Any
     ) -> None:
-        super().__init__()
+        super().__init__(logger)
 
         self.resampler = AllKNN(
             sampling_strategy=sampling_strategy,
@@ -22,3 +25,5 @@ class AllKnnResampler(Resampler):
             kind_sel=kind_sel,
             n_jobs=-1
         )
+
+        self._logger.log_params('imblearn', self.get_params())

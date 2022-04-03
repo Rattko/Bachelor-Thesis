@@ -1,6 +1,8 @@
 from imblearn.over_sampling import BorderlineSMOTE
 
+from core.logger import Logger
 from core.preprocessings.resampler import Resampler
+
 
 class BorderlineSmoteResampler(Resampler):
     _hyperparams = {
@@ -11,10 +13,11 @@ class BorderlineSmoteResampler(Resampler):
     }
 
     def __init__(
-        self, sampling_strategy: float, k_neighbors: int,
-        m_neighbors: int, kind: str, random_state: int
+        self, logger: Logger, sampling_strategy: float,
+        k_neighbors: int, m_neighbors: int,
+        kind: str, random_state: int
     ) -> None:
-        super().__init__()
+        super().__init__(logger)
 
         self.resampler = BorderlineSMOTE(
             sampling_strategy=sampling_strategy,
@@ -24,3 +27,5 @@ class BorderlineSmoteResampler(Resampler):
             random_state=random_state,
             n_jobs=-1
         )
+
+        self._logger.log_params('imblearn', self.get_params())

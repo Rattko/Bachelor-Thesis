@@ -1,6 +1,8 @@
 from imblearn.over_sampling import SVMSMOTE
 
+from core.logger import Logger
 from core.preprocessings.resampler import Resampler
+
 
 class SvmSmoteResampler(Resampler):
     _hyperparams = {
@@ -10,9 +12,10 @@ class SvmSmoteResampler(Resampler):
     }
 
     def __init__(
-        self, sampling_strategy: float, k_neighbors: int, m_neighbors: int, random_state: int
+        self, logger: Logger, sampling_strategy: float,
+        k_neighbors: int, m_neighbors: int, random_state: int
     ) -> None:
-        super().__init__()
+        super().__init__(logger)
 
         self.resampler = SVMSMOTE(
             sampling_strategy=sampling_strategy,
@@ -21,3 +24,5 @@ class SvmSmoteResampler(Resampler):
             random_state=random_state,
             n_jobs=-1
         )
+
+        self._logger.log_params('imblearn', self.get_params())

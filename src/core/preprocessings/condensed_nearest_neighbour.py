@@ -1,6 +1,8 @@
 from imblearn.under_sampling import CondensedNearestNeighbour
 
+from core.logger import Logger
 from core.preprocessings.resampler import Resampler
+
 
 class CondensedNearestNeighbourResampler(Resampler):
     _hyperparams = {
@@ -10,9 +12,10 @@ class CondensedNearestNeighbourResampler(Resampler):
     }
 
     def __init__(
-        self, sampling_strategy: str, n_neighbors: int, n_seeds_S: int, random_state: int
+        self, logger: Logger, sampling_strategy: str,
+        n_neighbors: int, n_seeds_S: int, random_state: int
     ) -> None:
-        super().__init__()
+        super().__init__(logger)
 
         self.resampler = CondensedNearestNeighbour(
             sampling_strategy=sampling_strategy,
@@ -21,3 +24,5 @@ class CondensedNearestNeighbourResampler(Resampler):
             random_state=random_state,
             n_jobs=-1
         )
+
+        self._logger.log_params('imblearn', self.get_params())
