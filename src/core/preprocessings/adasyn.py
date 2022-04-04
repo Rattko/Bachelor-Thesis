@@ -6,12 +6,13 @@ from core.preprocessings.resampler import Resampler
 
 class AdasynResampler(Resampler):
     _hyperparams = {
-        'sampling_strategy': [0.75, 1],
+        'sampling_strategy': [0.75, 1.0],
         'n_neighbors': [5, 10]
     }
 
     def __init__(
-        self, logger: Logger, sampling_strategy: float, n_neighbors: int, random_state: int
+        self, logger: Logger, sampling_strategy: float = 1.0,
+        n_neighbors: int = 5, random_state: int = None
     ) -> None:
         super().__init__(logger)
 

@@ -6,12 +6,13 @@ from core.preprocessings.resampler import Resampler
 
 class SmoteResampler(Resampler):
     _hyperparams = {
-        'sampling_strategy': [0.75, 1],
+        'sampling_strategy': [0.75, 1.0],
         'k_neighbors': [5, 10]
     }
 
     def __init__(
-        self, logger: Logger, sampling_strategy: float, k_neighbors: int, random_state: int
+        self, logger: Logger, sampling_strategy: float = 1.0,
+        k_neighbors: int = 5, random_state: int = None
     ) -> None:
         super().__init__(logger)
 
