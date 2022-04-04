@@ -6,10 +6,12 @@ from core.preprocessings.resampler import Resampler
 
 class RandomUndersamplingResampler(Resampler):
     _hyperparams = {
-        'sampling_strategy': [0.75, 1]
+        'sampling_strategy': [0.75, 1.0]
     }
 
-    def __init__(self, logger: Logger, sampling_strategy: float, random_state: int) -> None:
+    def __init__(
+        self, logger: Logger, sampling_strategy: float = 1.0, random_state: int = None
+    ) -> None:
         super().__init__(logger)
 
         self.resampler = RandomUnderSampler(

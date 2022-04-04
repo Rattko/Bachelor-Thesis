@@ -11,7 +11,9 @@ class TomekLinksResampler(Resampler):
         'sampling_strategy': ['not minority']
     }
 
-    def __init__(self, logger: Logger, sampling_strategy: str, **kwargs: Any) -> None:
+    def __init__(
+        self, logger: Logger, sampling_strategy: str = 'not minority', **kwargs: Any
+    ) -> None:
         super().__init__(logger)
 
         self.resampler = TomekLinks(

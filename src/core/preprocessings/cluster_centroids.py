@@ -6,12 +6,13 @@ from core.preprocessings.resampler import Resampler
 
 class ClusterCentroidsResampler(Resampler):
     _hyperparams = {
-        'sampling_strategy': [0.75, 1],
+        'sampling_strategy': [0.75, 1.0],
         'voting': ['hard', 'soft']
     }
 
     def __init__(
-        self, logger: Logger, sampling_strategy: float, voting: str, random_state: int
+        self, logger: Logger, sampling_strategy: float = 1.0,
+        voting: str = 'soft', random_state: int = None
     ) -> None:
         super().__init__(logger)
 

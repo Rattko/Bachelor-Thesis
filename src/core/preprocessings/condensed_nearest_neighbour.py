@@ -12,8 +12,8 @@ class CondensedNearestNeighbourResampler(Resampler):
     }
 
     def __init__(
-        self, logger: Logger, sampling_strategy: str,
-        n_neighbors: int, n_seeds_S: int, random_state: int
+        self, logger: Logger, sampling_strategy: str = 'not minority',
+        n_neighbors: int = 5, n_seeds_S: int = 1, random_state: int = None
     ) -> None:
         super().__init__(logger)
 

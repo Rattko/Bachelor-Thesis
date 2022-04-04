@@ -14,8 +14,8 @@ class EditedNearestNeighboursResampler(Resampler):
     }
 
     def __init__(
-        self, logger: Logger, sampling_strategy: str,
-        n_neighbors: int, kind_sel: str, **kwargs: Any
+        self, logger: Logger, sampling_strategy: str = 'not minority',
+        n_neighbors: int = 3, kind_sel: str = 'all', **kwargs: Any
     ) -> None:
         super().__init__(logger)
 

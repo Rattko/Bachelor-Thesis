@@ -15,8 +15,8 @@ class NeighbourhoodCleaningRuleResampler(Resampler):
     }
 
     def __init__(
-        self, logger: Logger, sampling_strategy: str, n_neighbors: int,
-        kind_sel: str, threshold_cleaning: float, **kwargs: Any
+        self, logger: Logger, sampling_strategy: str = 'not minority', n_neighbors: int = 3,
+        kind_sel: str = 'all', threshold_cleaning: float = 0.5, **kwargs: Any
     ) -> None:
         super().__init__(logger)
 

@@ -8,14 +8,14 @@ from core.preprocessings.resampler import Resampler
 
 class NearMissResampler(Resampler):
     _hyperparams = {
-        'sampling_strategy': [0.75, 1],
+        'sampling_strategy': [0.75, 1.0],
         'n_neighbors': [5, 10],
         'version': [1, 2, 3]
     }
 
     def __init__(
-        self, logger: Logger, sampling_strategy: float,
-        n_neighbors: int, version: int, **kwargs: Any
+        self, logger: Logger, sampling_strategy: float = 1.0,
+        n_neighbors: int = 3, version: int = 1, **kwargs: Any
     ) -> None:
         super().__init__(logger)
 
