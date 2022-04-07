@@ -21,6 +21,9 @@ parser.add_argument(
     '--classes', type=int, default=2, help='Number of classes in a dataset'
 )
 parser.add_argument(
+    '--directory', type=str, default='./datasets', help='Path to the destination directory'
+)
+parser.add_argument(
     '--max_missing_values', type=float, default=0.2,
     help='Maximum percentage of samples with missing values'
 )
@@ -100,7 +103,7 @@ def get_licences(datasets: list[Dataset]) -> list[tuple[str, str, str]]:
 
     return [(dataset.name, dataset.licence, dataset.openml_url) for dataset in datasets_info]
 
-def get_dataset(dataset: Dataset) -> None:
+def get_dataset(dataset: Dataset, directory: str) -> None:
     dataset_info = openml.datasets.get_dataset(dataset.dataset_id)
 
     dataset.url = dataset_info.openml_url
@@ -137,21 +140,23 @@ def get_dataset(dataset: Dataset) -> None:
     dataset.data = pipeline.fit_transform(data)
     dataset.target = LabelEncoder().fit_transform(target)
 
-    with lzma.open(f'./datasets/{dataset.dataset_id}.pickle', mode='wb') as dataset_file:
+    with lzma.open(f'{directory}/{dataset.dataset_id}.pickle', mode='wb') as dataset_file:
         pickle.dump(dataset, dataset_file)
 
 def main(args: argparse.Namespace, blacklist: list[str]) -> None:
+    os.makedirs(args.directory, exist_ok=True)
+
     datasets = list_datasets(
         args.min_instances, args.max_missing_values, args.classes, args.min_imbalance_ratio
     )
     datasets = [dataset for dataset in datasets if dataset.name not in blacklist]
     downloaded_datasets = [
-        x.removesuffix('.pickle') for x in os.listdir('./datasets') if x.endswith('.pickle')
+        x.removesuffix('.pickle') for x in os.listdir(args.directory) if x.endswith('.pickle')
     ]
 
     if args.wipe_datasets:
         for file in downloaded_datasets:
-            os.remove(f'./datasets/{file}.pickle')
+            os.remove(f'{args.directory}/{file}.pickle')
 
         downloaded_datasets = []
 
@@ -160,7 +165,7 @@ def main(args: argparse.Namespace, blacklist: list[str]) -> None:
             continue
 
         try:
-            get_dataset(dataset)
+            get_dataset(dataset, args.directory)
         except Exception as exc:
             print(dataset, file=sys.stderr)
             print(exc, file=sys.stderr)

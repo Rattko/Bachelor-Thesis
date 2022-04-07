@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
 
-export KAGGLE_USERNAME=''
-export KAGGLE_KEY=''
+export KAGGLE_USERNAME='radovanhaluska'
+export KAGGLE_KEY='1787a2bbaec8d5d2f35653557dc7f409'
 
 download_fraud_dataset() {
     # https://www.kaggle.com/mlg-ulb/creditcardfraud
