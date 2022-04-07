@@ -1,8 +1,10 @@
 numpy
 pandas
 matplotlib
-seaborn
 scikit-learn
+imbalanced-learn
 auto-sklearn
 mlflow
 kaggle
+openml
+tqdm
