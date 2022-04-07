@@ -1,2 +1,6 @@
+.mlruns.db
+
 .venv/
+.mypy_cache/
+.mlruns-artifacts/
 datasets/
