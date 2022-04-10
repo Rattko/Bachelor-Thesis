@@ -32,7 +32,7 @@ def check_preprocessings(preprocessings: list[str]) -> list[str]:
     if preprocessings == ['all']:
         return [
             preprocessing.removesuffix('.py')
-            for preprocessing in os.listdir('src/core/preprocessing')
+            for preprocessing in os.listdir('src/core/preprocessings')
             if preprocessing != 'resampler.py'
         ]
 
@@ -43,7 +43,7 @@ def check_preprocessings(preprocessings: list[str]) -> list[str]:
         return list(
             {
                 preprocessing.removesuffix('.py')
-                for preprocessing in os.listdir('src/core/preprocessing')
+                for preprocessing in os.listdir('src/core/preprocessings')
                 if preprocessing != 'resampler.py'
             } - OVERSAMPLING_METHODS
         )
