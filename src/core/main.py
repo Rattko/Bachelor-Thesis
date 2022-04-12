@@ -10,13 +10,14 @@ from autosklearn.classification import AutoSklearnClassifier
 from sklearn.model_selection import train_test_split
 
 from core.automl import AutoML
+from core.dataset import Dataset
 from core.logger import Logger
 from core.metrics import accuracy, balanced_accuracy, f1, log_loss, matthews_corr_coef
 from core.metrics import partial_roc_auc, precision, pr_auc, recall, roc_auc
 from core.no_preprocessing import NoPreprocessing
 from core.utils import calculate_imbalance, check_datasets, check_preprocessings
 from core.utils import get_dataset_name, get_preproc_name, get_resampler_name, get_run_name
-from core.utils import load_npz_dataset
+from core.utils import load_dataset
 
 
 parser = argparse.ArgumentParser()
@@ -85,9 +86,10 @@ def main(args: argparse.Namespace) -> None:
     mlflow.set_experiment(args.experiment)
 
     for dataset in args.datasets:
-        data, target = load_npz_dataset(dataset)
+        dataset = load_dataset(dataset)
         train_data, test_data, train_target, test_target = train_test_split(
-            data, target, stratify=target, test_size=args.test_size, random_state=args.random_state
+            dataset.data, dataset.target, stratify=dataset.target,
+            test_size=args.test_size, random_state=args.random_state
         )
 
         for preprocessing in args.preprocessings:
@@ -95,13 +97,13 @@ def main(args: argparse.Namespace) -> None:
             preproc_module = importlib.import_module(f'core.preprocessings.{preprocessing}')
             resampler_cls = getattr(preproc_module, get_resampler_name(preprocessing))
 
-            dataset_name = get_dataset_name(dataset)
             preproc_name = get_preproc_name(preprocessing)
 
-            logger = Logger(dataset_name, preproc_name)
+            logger = Logger(dataset.name, preproc_name)
+            # logger.log_dataset(dataset)
 
             if not args.grid_search:
-                with mlflow.start_run(run_name=get_run_name(dataset_name, preproc_name)):
+                with mlflow.start_run(run_name=get_run_name(dataset.name, preproc_name)):
                     # Resample the training part of the dataset
                     resampler = resampler_cls(logger, random_state=args.random_state)
 
@@ -117,7 +119,7 @@ def main(args: argparse.Namespace) -> None:
                 continue
 
             for preproc_hyperparam_config in resampler_cls.hyperparams():
-                with mlflow.start_run(run_name=get_run_name(dataset_name, preproc_name)):
+                with mlflow.start_run(run_name=get_run_name(dataset.name, preproc_name)):
                     # Resample the training part of the dataset
                     resampler = resampler_cls(
                         logger, **preproc_hyperparam_config, random_state=args.random_state
