@@ -5,7 +5,6 @@ import lzma
 import os
 import pickle
 import sys
-from dataclasses import dataclass, field
 
 import numpy as np
 import openml
@@ -15,6 +14,8 @@ from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder, OrdinalEncoder, StandardScaler
 from tqdm import tqdm
+
+from core.dataset import Dataset
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -40,23 +41,6 @@ parser.add_argument(
 
 openml.config.apikey = '47e99eef7c8b1b776c8bbadcd7763361'
 openml.config.cache_directory = os.path.expanduser('./.openml_cache')
-
-@dataclass
-class Dataset:
-    dataset_id: int
-    name: str
-    size: int
-    majority_size: int
-    minority_size: int
-    imbalance: float
-    url: str = None
-    data: np.ndarray = field(default=None, repr=False, compare=False)
-    target: np.ndarray = field(default=None, repr=False, compare=False)
-
-    def __post_init__(self):
-        self.size = int(self.size)
-        self.majority_size = int(self.majority_size)
-        self.minority_size = int(self.minority_size)
 
 def list_datasets(
     min_instances: int, max_missing_values: float, classes: int, min_imbalance_ratio: int
