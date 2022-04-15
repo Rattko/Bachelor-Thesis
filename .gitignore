@@ -3,4 +3,5 @@
 .venv/
 .mypy_cache/
 .mlruns-artifacts/
+*.egg-info/
 datasets/
