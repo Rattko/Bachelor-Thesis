@@ -2,6 +2,7 @@
 
 import argparse
 import importlib
+import random
 import traceback
 from typing import Any
 
@@ -115,14 +116,14 @@ def main(args: argparse.Namespace) -> None:
     mlflow.set_tracking_uri(args.tracking_uri)
     mlflow.set_experiment(args.experiment)
 
-    for dataset in args.datasets:
+    for dataset in random.sample(args.datasets, len(args.datasets)):
         dataset = load_dataset(dataset)
         train_data, test_data, train_target, test_target = train_test_split(
             dataset.data, dataset.target, stratify=dataset.target,
             test_size=args.test_size, random_state=args.random_state
         )
 
-        for preprocessing in args.preprocessings:
+        for preprocessing in random.sample(args.preprocessings, len(args.preprocessings)):
             # Retrieve the correct preprocessing module
             preproc_module = importlib.import_module(f'core.preprocessings.{preprocessing}')
             resampler_cls = getattr(preproc_module, get_resampler_name(preprocessing))
