@@ -76,6 +76,9 @@ class Logger:
             f'data_{curve_name}.json'
         )
 
+    def set_tags(self, tags: dict[str, Any]) -> None:
+        mlflow.set_tags(tags)
+
 
 def log_duration(func):
     @wraps(func)
