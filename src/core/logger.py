@@ -1,5 +1,8 @@
 import mlflow
 
+from functools import wraps
+from timeit import default_timer as timer
+
 from core.utils import get_run_name
 
 
@@ -71,3 +74,16 @@ class Logger:
             {'fpr': list(fpr), 'tpr': list(tpr), 'thresholds': list(thresholds)},
             f'data_{curve_name}.json'
         )
+
+
+def log_duration(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        preprocessing_start = timer()
+        ret = func(*args, **kwargs)
+        preprocessing_end = timer()
+
+        mlflow.log_metric('preprocessing_time', preprocessing_end - preprocessing_start)
+
+        return ret
+    return wrapper

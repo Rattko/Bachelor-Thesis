@@ -4,7 +4,7 @@ from typing import Any, Generator
 import numpy as np
 from imblearn.base import BaseSampler
 
-from core.logger import Logger
+from core.logger import Logger, log_duration
 
 
 class Resampler:
@@ -21,6 +21,7 @@ class Resampler:
         for conf in itertools.product(*cls._hyperparams.values()):
             yield dict(zip(keys, conf))
 
+    @log_duration
     def fit_resample(self, data: np.ndarray, target: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         return self.resampler.fit_resample(data, target)
 
