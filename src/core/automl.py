@@ -240,16 +240,21 @@ class AutoML:
 
         if max_fpr is not None:
             stop = int(np.searchsorted(fpr, max_fpr, 'right'))
-            tpr_at_max_fpr = np.interp(
-                max_fpr, [fpr[stop - 1], fpr[stop]], [tpr[stop - 1], tpr[stop]]
-            )
-            threshold_at_max_fpr = np.interp(
-                max_fpr, [fpr[stop - 1], fpr[stop]], [thresholds[stop - 1], thresholds[stop]]
-            )
 
-            fpr = np.append(fpr[:stop], max_fpr)
-            tpr = np.append(tpr[:stop], tpr_at_max_fpr)
-            thresholds = np.append(thresholds[:stop], threshold_at_max_fpr)
+            try:
+                tpr_at_max_fpr = np.interp(
+                    max_fpr, [fpr[stop - 1], fpr[stop]], [tpr[stop - 1], tpr[stop]]
+                )
+                threshold_at_max_fpr = np.interp(
+                    max_fpr, [fpr[stop - 1], fpr[stop]], [thresholds[stop - 1], thresholds[stop]]
+                )
+
+                fpr = np.append(fpr[:stop], max_fpr)
+                tpr = np.append(tpr[:stop], tpr_at_max_fpr)
+                thresholds = np.append(thresholds[:stop], threshold_at_max_fpr)
+            except IndexError:
+                self.__logger.set_tags({'partial_roc_missing': True})
+                return plt.figure()
 
         fig = plt.figure()
         plt.plot(fpr, tpr, 'r-', label=f'AUC = {score:.3f}')
@@ -259,7 +264,9 @@ class AutoML:
             'k-.', label='AUC = {0.5:.3f}'
         )
 
-        plt.title('Receiver Operating Characteristic Curve')
+        plt.title(
+            ('Partial ' if max_fpr is not None else '') + 'Receiver Operating Characteristic Curve'
+        )
         plt.xlabel('False Positive Rate')
         plt.ylabel('True Positive Rate')
         plt.xscale('log')

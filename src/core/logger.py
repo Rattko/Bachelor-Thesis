@@ -45,6 +45,8 @@ class Logger:
             self.__log_pr_curve(figure, *curve_data)
         elif title == 'Receiver Operating Characteristic Curve':
             self.__log_roc_curve(figure, *curve_data)
+        elif title == 'Partial Receiver Operating Characteristic Curve':
+            self.__log_roc_curve(figure, *curve_data)
         else:
             raise NotImplementedError()
 
