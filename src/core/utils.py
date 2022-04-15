@@ -80,11 +80,11 @@ def check_preprocessings(preprocessings: list[str]) -> list[str]:
 def get_resampler_name(module_name: str) -> str:
     return module_name.title().replace('_', '') + 'Resampler'
 
-def get_dataset_name(dataset_name: str) -> str:
-    return f'Dataset {dataset_name.title()}'
-
 def get_preproc_name(preproc_name: str) -> str:
     return preproc_name.title().replace('_', '')
 
 def get_run_name(dataset_name: str, preproc_name: str) -> str:
-    return f'{dataset_name} - {preproc_name}'
+    return f'{preproc_name} - {dataset_name}'
+
+def get_model_name(experiment: str, dataset_name: str, preproc_name: str) -> str:
+    return f'{experiment} / {preproc_name} - {dataset_name}'

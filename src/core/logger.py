@@ -2,24 +2,25 @@ import mlflow
 
 from functools import wraps
 from timeit import default_timer as timer
+from typing import Any
 
-from core.utils import get_run_name
+from core.utils import get_model_name
 
 
 class Logger:
-    def __init__(self, dataset_name: str, preproc_name: str) -> None:
+    def __init__(self, experiment: str, dataset_name: str, preproc_name: str) -> None:
+        self.experiment = experiment
         self.dataset_name = dataset_name
         self.preproc_name = preproc_name
 
-    def log_params(self, prefix: str, params) -> None:
+    def log_params(self, prefix: str, params: dict[str, Any]) -> None:
         # Log namespaced hyperparameters into MLFlow
         mlflow.log_params({f'{prefix}__{key}': value for key, value in params.items()})
 
     def log_model(self, model) -> None:
         # Pickle the trained AutoSklearn model into MLFlow
-        mlflow.sklearn.log_model(
-            model, 'model', registered_model_name=get_run_name(self.dataset_name, self.preproc_name)
-        )
+        model_name = get_model_name(self.experiment, self.dataset_name, self.preproc_name)
+        mlflow.sklearn.log_model(model, 'model', registered_model_name=model_name)
 
     def log_preds(self, data, target, preds) -> None:
         file_name = 'preds.json' if len(preds.shape) == 1 else 'preds_proba.json'

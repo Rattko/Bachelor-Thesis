@@ -16,13 +16,13 @@ from core.metrics import accuracy, balanced_accuracy, f1, log_loss, matthews_cor
 from core.metrics import partial_roc_auc, precision, pr_auc, recall, roc_auc
 from core.no_preprocessing import NoPreprocessing
 from core.utils import calculate_imbalance, check_datasets, check_preprocessings
-from core.utils import get_dataset_name, get_preproc_name, get_resampler_name, get_run_name
+from core.utils import get_preproc_name, get_resampler_name, get_run_name
 from core.utils import load_dataset
 
 
 parser = argparse.ArgumentParser()
 
-# MLFlow related switches
+# Mlflow related switches
 parser.add_argument('--tracking_uri', type=str, default='http://127.0.0.1:5000')
 parser.add_argument('--experiment', type=str, default='Benchmark')
 
@@ -99,8 +99,7 @@ def main(args: argparse.Namespace) -> None:
 
             preproc_name = get_preproc_name(preprocessing)
 
-            logger = Logger(dataset.name, preproc_name)
-            # logger.log_dataset(dataset)
+            logger = Logger(args.experiment, dataset.name, preproc_name)
 
             if not args.grid_search:
                 with mlflow.start_run(run_name=get_run_name(dataset.name, preproc_name)):
