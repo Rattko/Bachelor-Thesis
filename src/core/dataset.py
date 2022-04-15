@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields
 
 import numpy as np
 
@@ -18,3 +18,6 @@ class Dataset:
         self.size = int(self.size)
         self.majority_size = int(self.majority_size)
         self.minority_size = int(self.minority_size)
+
+    def to_dict(self):
+        return {fld.name: getattr(self, fld.name) for fld in fields(self) if fld.repr}
