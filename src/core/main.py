@@ -145,8 +145,13 @@ def main(args: argparse.Namespace) -> None:
                     run_experiment(args, logger, *preproc_data, test_data, test_target)
                     mlflow.end_run()
                 except Exception as exc:
-                    mlflow.end_run(status='FAILED')
                     traceback.print_exception(exc)
+                finally:
+                    # Handle cases where execution have failed
+                    # and thus have disallowed to end a run successfully.
+                    # This includes an occurence of any exception
+                    # or halting with Ctrl+C for example.
+                    mlflow.end_run(status='FAILED')
 
                 continue
 
@@ -171,8 +176,13 @@ def main(args: argparse.Namespace) -> None:
                     run_experiment(args, logger, *preproc_data, test_data, test_target)
                     mlflow.end_run()
                 except Exception as exc:
-                    mlflow.end_run(status='FAILED')
                     traceback.print_exception(exc)
+                finally:
+                    # Handle cases where execution have failed
+                    # and thus have disallowed to end a run successfully.
+                    # This includes an occurence of any exception
+                    # or halting with Ctrl+C for example.
+                    mlflow.end_run(status='FAILED')
 
 if __name__ == '__main__':
     autosklearn.pipeline.components.data_preprocessing.add_preprocessor(NoPreprocessing)
