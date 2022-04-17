@@ -8,7 +8,6 @@ import pandas as pd
 
 from autosklearn.estimators import AutoSklearnClassifier
 from autosklearn.metrics import _PredictScorer, _ProbaScorer, _ThresholdScorer
-from matplotlib.figure import Figure
 from sklearn.metrics import precision_recall_curve, roc_curve
 
 from core.exceptions import NoModelError
@@ -176,7 +175,7 @@ class AutoML:
 
         return scores
 
-    def plot_pr_curve(self, target: np.ndarray, preds_proba: np.ndarray, score: float) -> Figure:
+    def plot_pr_curve(self, target: np.ndarray, preds_proba: np.ndarray, score: float) -> None:
         """ Plot the PR curve using the given data.
 
         Parameters
@@ -187,11 +186,6 @@ class AutoML:
             Matrix containing predictions of shape (n_samples, n_classes).
         score : float
             Area under the PR curve obtained on the given data.
-
-        Returns
-        -------
-        fig : Figure
-            Figure instance containing the plot of the PR curve.
         """
 
         precision, recall, thresholds = precision_recall_curve(target, preds_proba[:, 1])
@@ -208,12 +202,12 @@ class AutoML:
 
         self.__logger.log_curve(fig, *(precision, recall, thresholds))
 
-        return fig
+        plt.close(fig)
 
     def plot_roc_curve(
         self, target: np.ndarray, preds_proba: np.ndarray,
         score: float, max_fpr: Optional[float] = None
-    ) -> Figure:
+    ) -> None:
         """ Plot the ROC curve using the given data.
 
         If the `max_fpr` parameter is provided, the created plot will contain
@@ -229,11 +223,6 @@ class AutoML:
             Area under the ROC curve obtained on the given data.
         max_fpr : Optional[float]
             Upper bound for the FPR values, i.e. [0, max_fpr].
-
-        Returns
-        -------
-        fig : Figure
-            Figure instance containing the plot of the ROC curve.
         """
 
         fpr, tpr, thresholds = roc_curve(target, preds_proba[:, 1])
@@ -254,7 +243,7 @@ class AutoML:
                 thresholds = np.append(thresholds[:stop], threshold_at_max_fpr)
             except IndexError:
                 self.__logger.set_tags({'partial_roc_missing': True})
-                return plt.figure()
+                return None
 
         fig = plt.figure()
         plt.plot(fpr, tpr, 'r-', label=f'AUC = {score:.3f}')
@@ -276,7 +265,7 @@ class AutoML:
 
         self.__logger.log_curve(fig, *(fpr, tpr, thresholds))
 
-        return fig
+        plt.close(fig)
 
     def get_params(self, deep: bool = True) -> dict[str, Any]:
         """ Get hyperparameters of the AutoSklearnClassifier.
