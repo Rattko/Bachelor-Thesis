@@ -14,6 +14,7 @@ from sklearn.model_selection import train_test_split
 
 from core.automl import AutoML
 from core.dataset import Dataset
+from core.exceptions import NoModelError
 from core.logger import Logger
 from core.metrics import accuracy, balanced_accuracy, f1, log_loss, matthews_corr_coef
 from core.metrics import partial_roc_auc, precision, pr_auc, recall, roc_auc
@@ -145,6 +146,8 @@ def main(args: argparse.Namespace) -> None:
                     preproc_data = resampler.fit_resample(train_data, train_target)
                     run_experiment(args, logger, *preproc_data, test_data, test_target)
                     mlflow.end_run()
+                except NoModelError:
+                    logger.set_tags({'no_model_error': True})
                 except Exception as exc:
                     traceback.print_exception(exc)
                 finally:
@@ -176,6 +179,8 @@ def main(args: argparse.Namespace) -> None:
                     preproc_data = resampler.fit_resample(train_data, train_target)
                     run_experiment(args, logger, *preproc_data, test_data, test_target)
                     mlflow.end_run()
+                except NoModelError:
+                    logger.set_tags({'no_model_error': True})
                 except Exception as exc:
                     traceback.print_exception(exc)
                 finally:
