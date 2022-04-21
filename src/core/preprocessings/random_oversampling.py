@@ -6,7 +6,7 @@ from core.preprocessings.resampler import Resampler
 
 class RandomOversamplingResampler(Resampler):
     _hyperparams = {
-        'sampling_strategy': [0.75, 1.0],
+        'sampling_strategy': [0.75, 1.0]
     }
 
     def __init__(

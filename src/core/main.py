@@ -3,8 +3,9 @@
 import argparse
 import importlib
 import random
+import socket
 import traceback
-from typing import Any
+from typing import Any, Optional
 
 import autosklearn.pipeline.components.data_preprocessing
 import mlflow
@@ -19,6 +20,7 @@ from core.logger import Logger
 from core.metrics import accuracy, balanced_accuracy, f1, log_loss, matthews_corr_coef
 from core.metrics import partial_roc_auc, precision, pr_auc, recall, roc_auc
 from core.no_preprocessing import NoPreprocessing
+from core.preprocessings.resampler import Resampler
 from core.utils import calculate_imbalance, check_datasets, check_preprocessings
 from core.utils import get_preproc_name, get_resampler_name, get_run_name
 from core.utils import load_dataset
@@ -41,6 +43,7 @@ parser.add_argument('--random_state', type=int, default=1)
 parser.add_argument('--datasets', type=str, nargs='+', default=['all'])
 parser.add_argument('--preprocessings', type=str, nargs='+', default=['all'])
 parser.add_argument('--grid_search', action='store_true', default=False)
+
 
 def experiment_running_or_finished(
     args: argparse.Namespace, dataset_id: int, preprocessing: str, hyperparams: dict[str, Any]
@@ -66,10 +69,11 @@ def experiment_running_or_finished(
             [(run.data.tags['dataset'], run.data.tags['preprocessing']), preproc_hyperparams]
         )
 
-    return any([
+    return any(
         (str(dataset_id), preprocessing) == names and params | hyperparams == params
         for names, params in runs_to_skip
-    ])
+    )
+
 
 def run_experiment(
     args: argparse.Namespace, logger: Logger,
@@ -108,6 +112,43 @@ def run_experiment(
     automl.fit(train_data, train_target)
     automl.score(test_data, test_target)
 
+
+def initialise_run(
+    args: argparse.Namespace, dataset: Dataset, resampler_cls: Resampler, preprocessing: str,
+    train_data: np.ndarray, train_target: np.ndarray, test_data: np.ndarray,
+    test_target: np.ndarray, preproc_hyperparams: Optional[dict[str, Any]] = None
+) -> None:
+    mlflow.start_run(run_name=get_run_name(dataset.dataset_id, get_preproc_name(preprocessing)))
+    logger = Logger(args.experiment, dataset.name, get_preproc_name(preprocessing))
+
+    logger.set_tags({
+        'machine': socket.gethostname(),
+        'dataset': dataset.dataset_id,
+        'preprocessing': preprocessing
+    })
+    logger.log_params('dataset', dataset.to_dict())
+
+    # Resample the training part of the dataset
+    if preproc_hyperparams is None:
+        resampler = resampler_cls(logger, random_state=args.random_state)
+    else:
+        resampler = resampler_cls(logger, **preproc_hyperparams, random_state=args.random_state)
+
+    try:
+        preproc_data = resampler.fit_resample(train_data, train_target)
+        run_experiment(args, logger, *preproc_data, test_data, test_target)
+        mlflow.end_run()
+    except NoModelError:
+        logger.set_tags({'no_model_error': True})
+    except Exception as exc:
+        traceback.print_exception(exc)
+    finally:
+        # Handle cases where execution have failed and thus have disallowed to end a run
+        # successfully. This includes an occurence of any exception or halting with Ctrl+C
+        # for example.
+        mlflow.end_run(status='FAILED')
+
+
 def main(args: argparse.Namespace) -> None:
     # Check and parse datasets and preprocessings given on the command line
     args.datasets = check_datasets(args.datasets)
@@ -129,66 +170,25 @@ def main(args: argparse.Namespace) -> None:
             preproc_module = importlib.import_module(f'core.preprocessings.{preprocessing}')
             resampler_cls = getattr(preproc_module, get_resampler_name(preprocessing))
 
-            preproc_name = get_preproc_name(preprocessing)
-
-            logger = Logger(args.experiment, dataset.name, preproc_name)
-
             if not args.grid_search:
-                mlflow.start_run(run_name=get_run_name(dataset.dataset_id, preproc_name))
-
-                logger.set_tags({'dataset': dataset.dataset_id, 'preprocessing': preprocessing})
-                logger.log_params('dataset', dataset.to_dict())
-
-                # Resample the training part of the dataset
-                resampler = resampler_cls(logger, random_state=args.random_state)
-
-                try:
-                    preproc_data = resampler.fit_resample(train_data, train_target)
-                    run_experiment(args, logger, *preproc_data, test_data, test_target)
-                    mlflow.end_run()
-                except NoModelError:
-                    logger.set_tags({'no_model_error': True})
-                except Exception as exc:
-                    traceback.print_exception(exc)
-                finally:
-                    # Handle cases where execution have failed
-                    # and thus have disallowed to end a run successfully.
-                    # This includes an occurence of any exception
-                    # or halting with Ctrl+C for example.
-                    mlflow.end_run(status='FAILED')
+                initialise_run(
+                    args, dataset, resampler_cls, preprocessing,
+                    train_data, train_target, test_data, test_target
+                )
 
                 continue
 
-            for preproc_hyperparam_config in resampler_cls.hyperparams():
+            for preproc_hyperparams in resampler_cls.hyperparams():
                 if experiment_running_or_finished(
-                    args, dataset.dataset_id, preprocessing, preproc_hyperparam_config
+                    args, dataset.dataset_id, preprocessing, preproc_hyperparams
                 ):
                     continue
 
-                mlflow.start_run(run_name=get_run_name(dataset.dataset_id, preproc_name))
-
-                logger.set_tags({'dataset': dataset.dataset_id, 'preprocessing': preprocessing})
-                logger.log_params('dataset', dataset.to_dict())
-
-                # Resample the training part of the dataset
-                resampler = resampler_cls(
-                    logger, **preproc_hyperparam_config, random_state=args.random_state
+                initialise_run(
+                    args, dataset, resampler_cls, preprocessing, train_data,
+                    train_target, test_data, test_target, preproc_hyperparams
                 )
 
-                try:
-                    preproc_data = resampler.fit_resample(train_data, train_target)
-                    run_experiment(args, logger, *preproc_data, test_data, test_target)
-                    mlflow.end_run()
-                except NoModelError:
-                    logger.set_tags({'no_model_error': True})
-                except Exception as exc:
-                    traceback.print_exception(exc)
-                finally:
-                    # Handle cases where execution have failed
-                    # and thus have disallowed to end a run successfully.
-                    # This includes an occurence of any exception
-                    # or halting with Ctrl+C for example.
-                    mlflow.end_run(status='FAILED')
 
 if __name__ == '__main__':
     autosklearn.pipeline.components.data_preprocessing.add_preprocessor(NoPreprocessing)
