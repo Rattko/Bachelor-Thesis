@@ -52,7 +52,7 @@ def experiment_running_or_finished(
 
     experiment = mlflow.get_experiment_by_name(args.experiment)
     runs_info = [
-        run for run in mlflow.list_run_infos(experiment.experiment_id)
+        run for run in mlflow.list_run_infos(experiment.experiment_id, max_results=100000)
         if run.status in ('FINISHED', 'RUNNING')
     ]
 
