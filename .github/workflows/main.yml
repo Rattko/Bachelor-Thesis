@@ -10,13 +10,16 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container: { image: 'aergus/latex' }
+    defaults:
+      run:
+        working-directory: thesis
 
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
       - name: Build the thesis
-        run: latexmk -pdf thesis/thesis
+        run: latexmk -pdf thesis
 
       - name: Upload PDF
         uses: actions/upload-artifact@v3
