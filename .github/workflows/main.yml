@@ -1,10 +1,6 @@
 name: Build LaTex Thesis
 
-on:
-  push:
-    branches: [ $default-branch ]
-
-  workflow_dispatch:
+on: [ push, workflow_dispatch ]
 
 jobs:
   build:
