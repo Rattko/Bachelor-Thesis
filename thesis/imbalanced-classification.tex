@@ -1,0 +1,102 @@
+\chapter{Imbalanced Classification}
+\label{chapter:imb-classif}
+
+
+\section{Oversampling Methods}
+\label{section:oversampling-methods}
+
+Oversampling methods constitute one possible approach to solving the imbalanced classification
+problem. The main goal of oversampling methods is to modify the empirical distribution by
+increasing the number of samples belonging to the minority class. The empirical distribution is
+modified either by duplicating the existing samples or generating new artificial samples until the
+desired imbalance ratio is reached. The following text presents oversampling methods used in the
+further chapters.
+
+
+\subsection{Random Oversampling}
+\label{subsection:random-oversampling}
+
+The most straightforward approach to tackling the underrepresentation of a class is by duplicating
+the available data samples belonging to that class. Samples to duplicate are chosen randomly with a
+replacement. Bare duplication of samples may introduce completely overlapping samples, as shown in
+the left scatter plot in Figure~\ref{figure:random-oversampling}. Random oversampling introduced
+sixty new minority samples to balance the classes; however, we can only see twenty, as most of them
+are entirely overlapping. A modification known as \textit{Random Oversampling Examples} (ROSE) was
+proposed in 2012 to avoid this~\cite{rose}. It starts by randomly choosing a sample from the
+minority class and then generates a new artificial sample in the close neighbourhood of the
+original sample. Generating new samples close to the already existing ones enlarges the regions
+occupied by the minority class~\cite{smote} and results in a better overall performance of a
+classifier.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{figures/random_oversampling_vs_rose.eps}
+    \caption{
+        \textbf{Random Oversampling vs ROSE.} The figure shows how generating new samples in the
+        close neighbourhood of the original sample helps to disperse the new samples instead of
+        stacking them on top of each other. In both cases, the oversampling method created sixty
+        new data samples shown in a brown colour.
+    }
+    \label{figure:random-oversampling}
+\end{figure}
+
+
+\subsection{Synthetic Minority Oversampling Technique - SMOTE}
+\label{subsection:smote}
+
+SMOTE was proposed by Chawla et al.~\cite{smote} in 2002 and is one of the most widely used
+imbalanced preprocessing techniques. It creates new synthetic examples on the line segments between
+existing examples from the minority class. The amount of oversampling supplied by the user
+determines if all minority samples participate in the oversampling. If we plan to oversample the
+minority class by at least 100\%, then every existing minority sample is used; otherwise, a random
+subset $\mathcal{S} \subseteq {S_{min}}$ of samples is chosen. The algorithm looks at k-nearest
+neighbours, where $k$ is again a hyperparameter supplied by the user, of an existing minority
+example $\mathbf{x}_i$ and randomly chooses a subset of the neighbours $\mathcal{N} =
+\{\,\mathbf{x} \mid \mathbf{x} \in \mathrm{kNN}(\mathbf{x}_i)\,\}$. The subset's size also depends
+on the amount of oversampling we plan to do. If, for example, we plan to oversample the minority
+class by 200\%, then for each existing minority sample, the subset will contain two randomly chosen
+neighbours. If, on the other hand, the amount of oversampling is less than 100\%, the algorithm
+generates one new artificial sample for each existing sample in the subset $\mathcal{S}$. For each
+neighbour $\mathbf{x}_j \in \mathcal{N}$, the algorithm computes the difference between
+$\mathbf{x}_i$ and $\mathbf{x}_j$, multiplies it by a random number $r$ chosen uniformly from the
+interval $(0, 1)$, and finally adds it to the original sample $\mathbf{x}_i$. The final formula for
+generating a new artificial sample is:
+\begin{equation}
+    \mathbf{x}_{new} = \mathbf{x}_i + r \cdot (\mathbf{x}_i - \mathbf{x}_j)
+    \label{equation:smote}
+\end{equation}
+
+
+\subsection{Borderline SMOTE}
+\label{subsection:bordeline-smote}
+
+One drawback the SMOTE algorithm has is that it considers all minority samples to be of the same
+importance. Minority samples surrounded largely by majority samples are far more prone to
+misclassification than those surrounded predominantly by minority samples. Borderline
+SMOTE~\cite{borderline-smote} tries to select only endangered minority samples and performs the
+original SMOTE algorithm only on those samples, as shown in
+Figure~\ref{figure:smote-vs-borderline}. The algorithm first finds k-nearest neighbours for each
+$\mathbf{x}_i \in S_{min}$. Next, it selects only those minority samples with at least half of
+their neighbours belonging to the majority class. One interesting case is when all of the
+neighbours of a minority sample belong to the majority class. In this case, the minority sample is
+considered noise in the data and is not selected. These conditions can be summarised as follow:
+\begin{equation}
+    \mathcal{S} = \{\mathbf{x} \mid \mathbf{x} \in S_{min} \land \frac{k}{2} \leq \, \mid
+        \mathrm{kNN}(\mathbf{x}_i) \cap S_{maj} \mid \, < k\}.
+\end{equation}
+The resulting set $\mathcal{S}$ is sent to the SMOTE algorithm to generate new artificial samples
+on the border.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{figures/smote_vs_borderlinesmote.eps}
+    \caption{
+        \textbf{SMOTE vs Borderline SMOTE.} The figure shows how the Borderline SMOTE algorithm,
+        depicted on the right, focuses its attention on endangered minority samples near the
+        decision boundary, while SMOTE sees every minority sample having the same importance. The
+        most noticeable difference can be seen on the far right side of the figures. SMOTE
+        generates new samples in those regions, whereas Borderline SMOTE does not, as those samples
+        are far from the decision boundary.
+    }
+    \label{figure:smote-vs-borderline}
+\end{figure}

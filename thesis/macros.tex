@@ -1,0 +1,17 @@
+% Create a chapter without a number and add it to the table of contents
+\def\chapterwithtoc#1{
+    \chapter*{#1}
+    \addcontentsline{toc}{chapter}{#1}
+}
+
+% If there is a line/figure overflowing into page margin, this will make the
+% problem evident by drawing a thick black line at the overflowing spot. You
+% should not disable this.
+\overfullrule=3mm
+
+% The maximum stretching of a space. Increasing this makes the text a bit more
+% sloppy, but may prevent the overflows by moving words to next line.
+\emergencystretch=1em
+
+\DeclareCaptionStyle{thesis}{style=base, font={small, sf}, labelfont=bf, labelsep=quad}
+\captionsetup{style=thesis}

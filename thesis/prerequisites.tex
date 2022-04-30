@@ -1,0 +1,34 @@
+\chapter{Prerequisites}
+\label{chapter:prerequisites}
+
+This chapter offers a quick overview of the theoretical background needed in the following
+chapters. We shall discuss what the classification task in machine learning is. Moreover, this
+chapter briefly describes several machine learning algorithms heavily utilised in the imbalanced
+preprocessing methods discussed in Chapter~\ref{chapter:imb-classif}. Finally, we shall touch upon
+the evaluation metrics used in classification tasks.
+
+
+\section{Classification}
+\label{section:classification}
+
+\textit{Classification} is one of the tasks of supervised machine learning. \textit{Classifiers}
+try to assign each sample $\mathbf{x}$ to a single category $y$ from a finite set of categories
+$\mathcal{C}$, sometimes referred to as \textit{class labels}. Some examples of classification are,
+for example, assigning a genre to a book based on a brief description or flagging computer binaries
+as benign or malicious. The goal of classification is to find a function $\mathbf{y} \colon
+\mathbb{R}^d \to \mathcal{C}$ that receives a sample $\mathbf{x}$ and produces an output $y$, a
+possible class label. In the beginning, we are given a set of examples $\{\mathbf{x}_1,
+\mathbf{x}_2, \mathbf{x}_3, \dots, \mathbf{x}_n\}$, where each $\mathbf{x}_i$ is a d-dimensional
+vector living in the euclidean vector space $\mathbb{R}^d$. Furthermore, we possess a ground truth
+in the form of labels $\{y_1, y_2, y_3, \dots, y_n\}$. The domain of $y_i$ depends on the
+classification task. In case of \textit{binary} classification, the domain is $\{0, 1\}$, and $\{0,
+1, \dots, k - 1\}$ in case of classification into $k$ classes called \textit{multi-class}
+classification. We usually split the provided data into \textit{training} set $\{(\mathbf{x}_i,
+y_i)\}_{i=1}^{m}$ and \textit{test} set $\{(\mathbf{x}_i, y_i)\}_{i=m + 1}^{n}$.  We use the
+training set to train a classifier, i.e. find a function $\mathbf{y}$ that best describes the data.
+As our finite dataset cannot possibly contain all possible samples $\mathbf{x}$, one of the
+essential requirements for a classifier is the ability to \textit{generalise}. Generalisation is
+the ability to classify unseen examples well. Once a classifier has finished training, we can
+evaluate its performance on unseen data from the test set.  This way, we can test how well the
+trained classifier generalises. We shall discuss various evaluation metrics in
+Section~\ref{section:metrics}.

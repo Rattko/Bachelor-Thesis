@@ -1,0 +1,50 @@
+\documentclass[12pt, a4paper, twoside, openright]{report}
+
+\let\openright=\cleardoublepage
+
+\input{metadata}
+
+\usepackage[a-2u]{pdfx}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+% Fonts
+\usepackage{libertinus}
+
+% Useful packages
+\usepackage{amsmath, amsfonts}
+\usepackage{caption}
+\usepackage{microtype}
+
+% Bibliography tools
+\usepackage[backend=biber, style=numeric, maxnames=2, sorting=none]{biblatex}
+
+% Load the bibliography file
+\addbibresource{refs.bib}
+
+\hypersetup{unicode}
+\hypersetup{breaklinks=true}
+
+\usepackage[noabbrev]{cleveref}
+
+\input{todos} % Remove this before compiling the final version
+\input{macros}
+
+% Main document
+\begin{document}
+
+\include{title}
+
+\tableofcontents
+
+\include{introduction}
+\include{prerequisites}
+\include{imbalanced-classification}
+\include{benchmark}
+\include{conclusion}
+\include{bibliography}
+
+\appendix
+
+\openright
+\end{document}
