@@ -13,10 +13,10 @@ mlflow server \
 # Execute an experiment
 python3 src/core/main.py \
     --tracking_uri http://0.0.0.0:5001 \
-    --datasets fraud \
-    --preprocessings baseline \
-    --total_time 60 \
-    --time_per_run 20
+    --datasets 310 40900 \
+    --preprocessings smote tomek_links \
+    --total_time 90 \
+    --time_per_run 30
 
-echo 'Execute Ctrl+C to terminate...'
+echo 'Execute Ctrl+C to terminate...' >&2
 fg %1
