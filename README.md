@@ -2,7 +2,15 @@
 
 ## Description - TODO
 
-## Docker Image - TODO
+## Quick Preview
+
+You can use [Docker](https://www.docker.com) for a quick preview of the functionality. Run the following command:
+
+```zsh
+docker run --rm -it -p 5001:5001 rattko/bachelor-thesis:latest
+```
+
+The command downloads a pre-built [docker image](https://hub.docker.com/r/rattko/bachelor-thesis) from [Docker Hub](https://hub.docker.com) and runs it. The docker image fires up a Mlflow server and executes an experiment consisting of two preprocessing methods over two datasets. Four runs will be performed in total, each lasting roughly 90 seconds. One of the runs should fail due to insufficient training time; the other three may or may not finish successfully, depending on your PC's computing power. You can observe the results of the runs using Mlflow UI accessible on `127.0.0.1:5001`. Mlflow server will continue running after the experiment has finished until you stop the container or press `Ctrl-C`.
 
 ## Installation
 
