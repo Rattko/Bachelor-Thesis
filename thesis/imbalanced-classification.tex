@@ -133,3 +133,50 @@ the algorithm performs extrapolation to enlarge the area occupied by the minorit
     }
     \label{figure:smote-vs-svmsmote}
 \end{figure}
+
+
+\subsection{KMeans SMOTE}
+\label{subsection:kmeans-smote}
+
+Employing a uniform probability to choose minority samples to oversample is another drawback of
+SMOTE. It increases the likelihood of further inflating regions with many minority samples and
+neglecting sparse regions~\cite{kmeans-smote}. KMeans~SMOTE~\cite{kmeans-smote} is an enhancement
+of SMOTE that focuses on this issue. In the first phase, it employs the KMeans clustering
+algorithm~\ref{section:kmeans} to cluster data samples into $k$ groups based on the euclidean
+distance. Clustering helps focus the attention on the regions where minority samples are dominant,
+preventing SMOTE from generating unnecessary noise by interpolating noisy minority
+samples~\cite{kmeans-smote}. Once the clusters were identified, KMeans SMOTE retains only those
+clusters that contain more minority samples than majority samples, i.e. clusters whose imbalance
+ratio is greater than 1. Next, it computes how many artificial examples must be generated in each
+selected cluster based on its density of minority samples. This enables the subsequent step to
+generate more samples in sparse regions, thus achieving balanced between-class and
+\emph{within-class} distribution. The balanced within-class distribution ensures approximately the
+same density of minority samples in the minority class regions. The cluster's density is computed,
+for each cluster $f$, as follows:
+
+\begin{enumerate}
+    \item Calculate a distance matrix between minority samples belonging to cluster $f$
+    \item Calculate a mean distance $\mathrm{mean\_distance(f)}$
+    \item Calculate the cluster's density as $\mathrm{density(f)} = \frac{\mid S_{min}
+        \mid}{\mathrm{mean\_distance(f)}^m}$, where $m$ is the dimension of a sample
+    \item Calculate $\mathrm{sparsity(f)} = \frac{1}{\mathrm{density(f)}}$
+\end{enumerate}
+
+Finally, normalise $\mathrm{sparsity(f)}$ to be a distribution. Normalisation allows us to multiply
+each cluster's sparsity by the total number of data to generate to obtain the portion of samples to
+generate in each cluster. The last step of the algorithm consists of performing the SMOTE algorithm
+in each cluster separately to generate the needed number of samples to reach the specified ratio of
+majority and minority samples.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{figures/smote_vs_kmeanssmote.eps}
+    \caption{
+        \textbf{SMOTE vs KMeans SMOTE.} The figure compares SMOTE and KMeans SMOTE. We can see how
+        SMOTE generates many new samples, shown in brown, slightly below the point $(0, 0)$. KMeans
+        SMOTE, on the other hand, does not generate almost any new samples in that region as
+        samples in that region can be considered noise. The same reasoning can be applied to
+        samples at the top, surrounded predominantly by the majority class samples.
+    }
+    \label{figure:smote-vs-kmeanssmote}
+\end{figure}
