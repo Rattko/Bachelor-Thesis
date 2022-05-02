@@ -100,3 +100,36 @@ on the border.
     }
     \label{figure:smote-vs-borderline}
 \end{figure}
+
+
+\subsection{SVM SMOTE}
+\label{subsection:svm-smote}
+
+SVM~SMOTE~\cite{svm-smote} also enhances the SMOTE algorithm by focusing on endangered minority
+samples. It starts by training a support vector machine classifier~\ref{section:svm} using the
+original dataset. The SVM classifier identifies the so-called support vectors in the original data.
+These are the training samples that approximate the optimal decision boundary. SVM SMOTE uses these
+samples to generate artificial samples near the approximated optimal decision boundary using
+interpolation (SMOTE) or extrapolation depending on the density of the majority class around it.
+The number of artificial samples to generate is distributed evenly among minority class support
+vectors. For each minority support vector $\mathbf{x}_i$, find k-nearest neighbours on the whole
+training data set. If minority samples account for less than half of the neighbours, create a new
+artificial sample by interpolating between $\mathbf{x}_i$ and its neighbour $\mathbf{x}_j \in
+\mathrm{kNN}(\mathbf{x}_i)$ to strengthen the presence of the minority class in crowded regions.
+If, on the other hand, there are more minority samples among the neighbours than majority samples,
+the algorithm performs extrapolation to enlarge the area occupied by the minority class.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{figures/smote_vs_svmsmote.eps}
+    \caption{
+        \textbf{SMOTE vs SVM SMOTE.} The figure shows how SVM SMOTE, shown on the right, prefers
+        generating samples, shown in a brownish colour, near the decision boundary to strengthen
+        the presence of samples from the minority class. In contrast, the original implementation
+        of the SMOTE algorithm generates new samples near every original sample from the minority
+        class regardless of its position. Furthermore, we can see the interpolation in the dense
+        regions in the centre of the plot around the point $(0, 0)$ and the extrapolation on the
+        far right.
+    }
+    \label{figure:smote-vs-svmsmote}
+\end{figure}
