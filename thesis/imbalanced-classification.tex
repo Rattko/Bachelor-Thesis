@@ -406,6 +406,36 @@ samples participating in the Tomek Links while retaining all minority samples.
 \end{figure}
 
 
+\subsection{Neighbourhood Cleaning Rule}
+\label{subsection:neighbourhood-cleaning-rule}
+
+Neighbourhood Cleaning Rule~\cite{ncl} tries to mitigate one major drawback of the One-Sided
+Selection method discussed previously in Subsection~\ref{subsection:one-side-selection}. One-Sided
+Selection uses the CNN method~\ref{subsection:cnn}, which is extremely sensitive to noise,
+retaining noisy samples in the training set~\cite{ncl}. It uses the ENN method~\ref{subsection:enn}
+instead of CNN to remove the first batch of noisy data. Additionally, NCL cleans the neighbourhoods
+of minority samples. For each minority sample, it computes its three-nearest neighbours. If those
+neighbours misclassify the minority sample under consideration, it removes the neighbours of that
+sample that belong to the majority class.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{figures/ncl.eps}
+    \caption{
+        \textbf{Undersampling using Neighbourhood Cleaning Rule.} The figure depicts a process of
+        undersampling using the Neighbourhood Cleaning Rule. It starts with the original dataset on
+        the left, continues with the original dataset with data samples to remove marked in red and
+        brown colours and finishes with the resampled dataset. In the middle plot, we can see that
+        the data points identified as redundant by ENN are shown in red. The brown data points are
+        to be removed in the subsequent step as they hinder the classification of minority samples
+        using the three-nearest neighbour rule. It is best seen in the top portion of the plot
+        where all three nearest neighbours of the minority sample located approximately at the
+        point $(-0.5, 1.5)$ are shown in brown and missing in the following plot.
+    }
+    \label{figure:ncl}
+\end{figure}
+
+
 \subsection{Cluster Centroids}
 \label{subsection:cluster-centroids}
 
