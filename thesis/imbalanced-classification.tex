@@ -192,23 +192,27 @@ classify a given minority sample correctly. More synthetic data is generated in 
 hard to learn minority samples, and less data is generated in other, easier-to-learn regions. The
 weighting of the minority samples is the main difference between SMOTE and ADASYN, as SMOTE does
 not consider the surroundings of minority samples. The ADASYN algorithm starts by calculating the
-number of samples that need to be generated using:
+number of samples that need to be generated using
 \begin{equation}
-    G = \beta \cdot (\mid S_{maj} \mid - \mid S_{min} \mid)
+    G = \beta \cdot (\mid S_{maj} \mid - \mid S_{min} \mid),
 \end{equation}
-where $\beta \in (0, 1)$ controls the level of desired imbalance after resampling. Next, for each
-$\mathbf{x}_i \in S_{min}$, find its k-nearest neighbours using the euclidean distance in the
-feature space and calculate the portion $r_i$ of the majority samples in the neighbourhood.
+where $\beta \in (0, 1)$ controls the level of desired imbalance after resampling.
+
+Next, for each $\mathbf{x}_i \in S_{min}$, find its k-nearest neighbours using the euclidean
+distance in the feature space and calculate the portion $r_i$ of the majority samples in the
+neighbourhood.
 \begin{equation}
     r_i = \frac{\mid \mathrm{kNN}(\mathbf{x}_i) \cap S_{maj} \mid}{k}.
 \end{equation}
+
 Normalise $r_i$ to create a proper distribution, i.e. $\sum_{i = 1}^{\mid S_{min} \mid} r_i = 1$.
-Normalisation allows us to compute what fraction of the total samples needed to generate should be
+Normalisation allows us to compute what fraction of all samples that need to be generated should be
 generated using each of the minority samples. The number of samples $g_i$ to generate for each
 $x_i$ is computed as
 \begin{equation}
     g_i = r_i \cdot G.
 \end{equation}
+
 Finally, the algorithm uses Equation~\ref{equation:smote} to generate $g_i$ artificial samples for
 each minority sample $x_i$.
 
@@ -223,3 +227,26 @@ each minority sample $x_i$.
     }
     \label{figure:smote-vs-adasyn}
 \end{figure}
+
+
+\section{Undersampling Methods}
+\label{section:undersampling-methods}
+
+Undersampling methods focus on the majority class, as opposed to the oversampling methods discussed
+in Section \ref{section:oversampling-methods}, to address the issue of the imbalanced
+classification. These methods reduce the number of samples in the majority class to create a more
+balanced distribution of samples between classes. Most of the undersampling methods discussed are
+so-called \textit{prototype selection} methods. Prototype selection methods reduce the number of
+samples by removing unnecessary samples from the dataset and using only a subset of the original
+data. The Cluster Centroids method is the only example of a \textit{prototype generation} method
+discussed in the thesis. Prototype generation methods reduce the number of samples by generating
+new samples, e.g. centroids of clusters obtained by the KMeans algorithm~\ref{section:kmeans},
+instead of using a subset of the original ones.
+
+
+\subsection{Random Undersampling}
+\label{subsection:random-undersampling}
+
+Random undersampling works on the samples from the majority class. It works similarly to the Random
+oversampling discussed in~\ref{subsection:random-oversampling}, but instead of duplicating the
+randomly chosen samples, it removes them until the required number of samples is achieved.
