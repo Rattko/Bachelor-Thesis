@@ -155,11 +155,11 @@ same density of minority samples in the minority class regions. The cluster's de
 for each cluster $f$, as follows:
 
 \begin{enumerate}
-    \item Calculate a distance matrix between minority samples belonging to cluster $f$
-    \item Calculate a mean distance $\mathrm{mean\_distance(f)}$
-    \item Calculate the cluster's density as $\mathrm{density(f)} = \frac{\mid S_{min}
+    \item calculate a distance matrix between minority samples belonging to cluster $f$
+    \item calculate a mean distance $\mathrm{mean\_distance(f)}$
+    \item calculate the cluster's density as $\mathrm{density(f)} = \frac{\mid S_{min}
         \mid}{\mathrm{mean\_distance(f)}^m}$, where $m$ is the dimension of a sample
-    \item Calculate $\mathrm{sparsity(f)} = \frac{1}{\mathrm{density(f)}}$
+    \item calculate $\mathrm{sparsity(f)} = \frac{1}{\mathrm{density(f)}}$
 \end{enumerate}
 
 Finally, normalise $\mathrm{sparsity(f)}$ to be a distribution. Normalisation allows us to multiply
@@ -250,3 +250,49 @@ instead of using a subset of the original ones.
 Random undersampling works on the samples from the majority class. It works similarly to the Random
 oversampling discussed in~\ref{subsection:random-oversampling}, but instead of duplicating the
 randomly chosen samples, it removes them until the required number of samples is achieved.
+
+
+\subsection{Condensed Nearest Neighbour}
+\label{subsection:cnn}
+
+Condensed Nearest Neighbour rule~\cite{cnn} has been proposed to reduce the nearest neighbour
+rule's stringent storage requirements, retaining the basic idea of the nearest neighbour rule. The
+nearest neighbour rule works with the so-called stored reference set consisting of n examples that
+are correctly classified beforehand, for example, by a human annotator. A new sample is assigned
+the same class as its nearest neighbour in the reference set. The CNN rule reduces this potentially
+huge reference set to a \textit{consistent} set. The consistent set is a subset of the original
+reference set. When used as the reference set in the NN rule, it correctly classifies all of the
+examples from the original reference set. CNN rule uses two sets called \texttt{STORE} and
+\texttt{GRABBAG} and works as follows:
+
+\begin{enumerate}
+    \item initialise \texttt{STORE} = \texttt{GRABBAG} = \{\}
+    \item store the first example in the \texttt{STORE} set
+    \item classify the following example using only examples in the \texttt{STORE} set; if
+        classified correctly, put it in \texttt{\texttt{GRABBAG}} otherwise, put it in
+        \texttt{STORE}
+    \item continue inductively, i.e. the ith example is classified using the contents of
+        \texttt{STORE} and placed in \texttt{STORE} if misclassified, or in \texttt{GRABBAG} if
+        classified correctly
+    \item loop through the whole original reference set and continue looping through
+        \texttt{GRABBAG} once the original set was processed wholly
+    \item terminate when either the \texttt{STORE} equals the original reference set or when the
+        \texttt{STORE} has not changed for one whole pass
+    \item keep the \texttt{STORE} set and discard the \texttt{GRABBAG} set
+\end{enumerate}
+
+The CNN undersampling algorithm makes one change to this algorithm. It starts with \texttt{STORE} =
+$S_{min}$ and loops through examples in the majority class.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{figures/cnn.eps}
+    \caption{
+        \textbf{Undersampling using Condensed Nearest Neighbour.} The figure shows the original
+        data distribution on the left and how the CNN method reduces the majority class in size on
+        the right. With little overlap in the data, the CNN method discarded most of the samples
+        from the majority class. It kept only samples close to the decision boundary needed to
+        classify the remaining points correctly.
+    }
+    \label{figure:cnn}
+\end{figure}
