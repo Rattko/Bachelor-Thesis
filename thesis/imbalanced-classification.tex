@@ -404,3 +404,30 @@ samples participating in the Tomek Links while retaining all minority samples.
     }
     \label{figure:oss}
 \end{figure}
+
+
+\subsection{Cluster Centroids}
+\label{subsection:cluster-centroids}
+
+Cluster Centroids~\cite{cluster-centroids} is a method belonging to the category of prototype
+generation methods. Instead of selecting a subset of existing majority class samples, it
+synthesises new samples from the existing ones. As its name suggests, the cluster centroids method
+uses centres of clusters as the new undersampled data. It runs KMeans clustering
+algorithm~\ref{section:kmeans} on the majority class with an appropriate number of clusters to
+achieve the desired resulting ratio of samples belonging to individual classes. Once the KMeans
+algorithm finishes, we output the cluster centroids as new majority class data.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{figures/cluster_centroids.eps}
+    \caption{
+        \textbf{Undersampling using Cluster Centroids.} The figure shows how the Cluster Centroids
+        algorithm balances the distribution of samples between classes by creating new samples that
+        are centroids of clusters found within the original majority class data and discarding the
+        original majority class data. We can see how the new data points, shown in blue in the
+        middle plot, are not present in the original dataset shown in the left plot. For example,
+        there is a new majority example near the point $(-1.8, -2)$ in the central plot, whilst
+        there is no such sample in the original dataset.
+    }
+    \label{figure:cluster-centroids}
+\end{figure}
