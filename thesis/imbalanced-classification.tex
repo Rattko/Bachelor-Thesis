@@ -290,9 +290,66 @@ $S_{min}$ and loops through examples in the majority class.
     \caption{
         \textbf{Undersampling using Condensed Nearest Neighbour.} The figure shows the original
         data distribution on the left and how the CNN method reduces the majority class in size on
-        the right. With little overlap in the data, the CNN method discarded most of the samples
-        from the majority class. It kept only samples close to the decision boundary needed to
-        classify the remaining points correctly.
+        the right. With little overlap in the data, the CNN method discarded most samples from the
+        majority class. It kept only samples close to the decision boundary needed to classify the
+        remaining points correctly.
     }
     \label{figure:cnn}
 \end{figure}
+
+
+\subsection{Edited Nearest Neighbours \& Repeated ENN}
+\label{subsection:enn}
+
+We will now describe two other related modifications to the nearest neighbours algorithm. In the
+first step, the Edited Nearest Neighbours algorithm~\cite{enn} proposed by Dennis L. Wilson
+classifies all samples in the class to undersample by computing k-nearest neighbours for each on
+the whole original set. The second step proceeds to remove all such samples under consideration
+whose actual label does not match the label of most of their neighbours. Ivan Tomek proposed to
+repeat ENN multiple times to reduce the number of majority samples further~\cite{repeated-enn}. The
+algorithm iteratively reduces the number of samples in the majority class until there is no
+reduction in the number of majority samples or the maximum number of iterations is reached.
+
+
+\subsection{All KNN}
+\label{subsection:allknn}
+
+All KNN~\cite{repeated-enn}, also proposed by Ivan Tomek, uses the same idea as the two previous
+preprocessing methods to eliminate samples from the majority class when there is a label
+disagreement between a sample under consideration and its k-nearest neighbours. However, instead of
+using a fixed number of neighbours to check an agreement, it starts by looking at the single
+nearest neighbour, then two nearest neighbours and so on, until it reaches k-nearest neighbours. A
+sample is kept in the majority class only if its label agrees in all cases. This idea can be
+summarised in pseudocode in the following way:
+
+\begin{algorithm}
+    \caption{
+        \textbf{A pseudocode representation of the All KNN algorithm.} The algorithm uses the
+        \texttt{discard} set to store samples whose labels are inconsistent with the labels of
+        their neighbours. It loops over all samples from the majority class and uses
+        \textrm{NN}(\texttt{i}, \texttt{x}) to compute the \texttt{i}-nearest neighbours of sample
+        \texttt{x}. Samples whose label is inconsistent with labels of \texttt{i}-nearest
+        neighbours at any point are added to the \texttt{discard} set and removed from the
+        \texttt{maj\_samples} set at the end of the algorithm.
+    }
+    \label{algorithm:all-knn}
+
+    \begin{algorithmic}
+        \Function{AllKNN}{$\texttt{maj\_samples}, \texttt{k}$}
+            \State $\texttt{discard} \gets \{\}$
+
+            \For{$\texttt{x}$ \textbf{from} $\texttt{maj\_samples}$}
+                \For{$\texttt{i} \gets 1$ \textbf{to} $\texttt{k}$}
+                    \State $\texttt{neighbours} \gets \textrm{NN}(\texttt{i}, \texttt{x})$
+
+                    \If{$\texttt{x}$ is incorrectly classified using $\texttt{neighbours}$}
+                        \State $\texttt{discard}.\textrm{add}(\texttt{x})$
+                        \State \textbf{break}
+                    \EndIf
+                \EndFor
+            \EndFor
+
+            \State \Return $\texttt{maj\_samples} - \texttt{discard}$
+        \EndFunction
+    \end{algorithmic}
+\end{algorithm}
