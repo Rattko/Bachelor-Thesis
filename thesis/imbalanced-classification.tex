@@ -369,3 +369,38 @@ summarised in pseudocode in the following way:
         \EndFunction
     \end{algorithmic}
 \end{algorithm}
+
+
+\subsection{One-Sided Selection}
+\label{subsection:one-side-selection}
+
+Authors of the One-Sided Selection algorithm~\cite{one-sided-selection} developed a clever
+classification of majority samples into four categories. We describe these four categories below
+and depict them in Figure~\ref{figure:oss}.
+
+\begin{enumerate}
+    \item \emph{Noise samples} - usually samples surrounded by the opposite class
+    \item \emph{Borderline samples} - samples lying on the decision boundary
+    \item \emph{Redundant samples} - samples lying far away from the decision boundary
+    \item \emph{Safe samples} - rest of the samples that are worth keeping
+\end{enumerate}
+
+Moreover, the authors use the fact that noise and borderline samples can easily be recognised using
+Tomek Links methods~\ref{subsection:tomek-links}, and redundant samples can be removed using the
+idea discussed in Condensed Nearest Neighbours method~\ref{subsection:cnn}. The algorithm starts by
+finding the consistent subset $C$ of the original set by performing a single iteration of the CNN
+algorithm. Consequently, it identifies Tomek Links in $C$ and removes only the majority class
+samples participating in the Tomek Links while retaining all minority samples.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{figures/oss.eps}
+    \caption{
+        \textbf{Undersampling using One-Sided Selection.} The figure shows the original data on the
+        left. The scatter plot in the middle shows the borderline samples identified by the Tomek
+        Links method highlighted in red and redundant samples identified using one iteration of CNN
+        in brown. A single noisy sample is also identified using Tomek Links in the upper right
+        corner. The rightmost scatter plot shows the resulting undersampled dataset.
+    }
+    \label{figure:oss}
+\end{figure}
