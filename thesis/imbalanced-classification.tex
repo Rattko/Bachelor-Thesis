@@ -289,10 +289,11 @@ $S_{min}$ and loops through examples in the majority class.
     \includegraphics[width=\linewidth]{figures/cnn.eps}
     \caption{
         \textbf{Undersampling using Condensed Nearest Neighbour.} The figure shows the original
-        data distribution on the left and how the CNN method reduces the majority class in size on
-        the right. With little overlap in the data, the CNN method discarded most samples from the
-        majority class. It kept only samples close to the decision boundary needed to classify the
-        remaining points correctly.
+        data distribution on the left, the same data distribution after identifying samples to
+        remove shown in brown colour and the resulting undersampled dataset on the right after
+        applying the CNN method. With little overlap in the data, the CNN method discarded most
+        samples from the majority class. It kept only samples close to the decision boundary needed
+        to classify the remaining points correctly.
     }
     \label{figure:cnn}
 \end{figure}
@@ -305,10 +306,25 @@ We will now describe two other related modifications to the nearest neighbours a
 first step, the Edited Nearest Neighbours algorithm~\cite{enn} proposed by Dennis L. Wilson
 classifies all samples in the class to undersample by computing k-nearest neighbours for each on
 the whole original set. The second step proceeds to remove all such samples under consideration
-whose actual label does not match the label of most of their neighbours. Ivan Tomek proposed to
-repeat ENN multiple times to reduce the number of majority samples further~\cite{repeated-enn}. The
-algorithm iteratively reduces the number of samples in the majority class until there is no
-reduction in the number of majority samples or the maximum number of iterations is reached.
+whose actual label does not match the label of most of their neighbours. We can see a plot showing
+the ENN method in Figure~\ref{figure:enn}. Ivan Tomek proposed to repeat ENN multiple times to
+reduce the number of majority samples further~\cite{repeated-enn}. The algorithm iteratively
+reduces the number of samples in the majority class until there is no reduction in the number of
+majority samples or the maximum number of iterations is reached. We refrain from showing a plot for
+the Repeated ENN method, as in this particular case, ENN and Repeated ENN produced the same
+results.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{figures/enn.eps}
+    \caption{
+        \textbf{Undersampling using Edited Nearest Neighbours.} The leftmost plot shows the
+        original dataset, and the rightmost plot shows the new undersampled one. The middle one
+        shows data samples marked for removal in brown colour as computed by the ENN method with
+        hyperparameter $k = 3$.
+    }
+    \label{figure:enn}
+\end{figure}
 
 
 \subsection{All KNN}
