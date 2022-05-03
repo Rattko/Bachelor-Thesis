@@ -1,6 +1,10 @@
 name: Build LaTex Thesis
 
-on: [ push, workflow_dispatch ]
+on:
+  push:
+    paths:
+      - 'thesis/**'
+  workflow_dispatch:
 
 jobs:
   build:
