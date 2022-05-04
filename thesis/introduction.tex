@@ -1,1 +1,50 @@
 \chapterwithtoc{Introduction}
+
+Many real-world domains generate data with a skewed distribution of its classes. While slight
+skewness does not usually pose any problem, once the skewness reaches a certain degree, standard
+machine learning classifiers, such as decision trees, support vector machines and linear
+classifiers, become unable to learn reliably from the data \cite{learning-from-imb-data}. In such
+cases, classifiers tend to get biased toward the majority class and neglect the underrepresented
+one, resulting in wildly varying accuracies on individual classes. It is not unusual to see
+accuracy in the majority class close to 100\%, while only 0-10\% in the minority
+class~\cite{learning-from-imb-data}. Such disproportion in performance poses a significant problem
+in many areas where the minority class is of greater importance. One such example is the problem of
+medical diagnosis of rare diseases, for example, cancer. There is a massive prevalence of negative,
+i.e. non-cancerous patients over positive ones and misclassification of a cancerous patient as
+non-cancerous will result in overwhelming consequences. There are, however, many more areas where
+data exhibit significant imbalance, for instance, fraud and network intrusion detection.
+
+There has been a great deal of interest in solving the imbalanced classification problem from the
+community of researchers in recent years. Many approaches have been proposed to tackle the problem.
+Among those approaches are resampling methods, cost-sensitive learning methods, ensemble methods,
+kernel-based learning methods, and active learning methods~\cite{learning-from-imb-data,
+gosain2017}. We shall focus our attention on one particular approach relying on modifying the
+dataset called resampling, but we shall briefly discuss other methods. The resampling approach does
+not require modification of the machine learning algorithm used and is thus suitable for use with
+already existing and well-known ones. However, as we shall see in the coming chapters, resampling
+algorithms modify the datasets by employing numerous strategies, and it is not clear which
+algorithms we should prefer and why.
+
+This thesis aims to systematically and robustly compare these methods and provide the source code
+to allow the reproduction of the results obtained and discussed in the second half of the thesis.
+Although there are already publications comparing some of these methods, their authors usually
+restrict themselves to one group of the resampling methods – oversampling methods~\cite{gosain2017,
+amin2016}. Additionally, they use a small number of datasets to evaluate the
+methods~\cite{gosain2017, amin2016, barandela2004}. As far as the author is aware, there has not
+been a published comparison covering eighteen different preprocessing methods over as many
+datasets.
+
+The structure of the thesis is as follows. We shall review three standard machine learning
+algorithms heavily used in the resampling methods and introduce standard and
+imbalanced-classification-specific evaluation metrics in Chapter~\ref{chapter:prerequisites}. In
+Chapter~\ref{chapter:imb-classif}, we shall discuss the imbalanced classification, briefly touch
+upon various possible approaches to solving this problem and then focus on one group of methods –
+the resampling methods. We shall describe many resampling algorithms, both oversampling and
+undersampling. We include visual illustrations to demonstrate the results of applying the methods
+to an artificial dataset. Chapter~\ref{chapter:benchmark} will describe the structure of a
+framework we designed to effectively compare preprocessing methods over provided datasets and
+describe the critical components of the framework in greater detail. \xxx{describe last chapters
+once you begin writing them}
+
+
+\chapterwithtoc{Notation}
