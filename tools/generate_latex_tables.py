@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 
 import os
+from collections import defaultdict
 
 import mlflow
 import numpy as np
 import pandas as pd
 
 
-def main(tracking_uri: str, experiment_name: str) -> None:
-    mlflow.set_tracking_uri(tracking_uri)
-
+def scores_by_dataset(experiment_name: str) -> defaultdict[str, pd.DataFrame]:
     experiment = mlflow.get_experiment_by_name(experiment_name)
     runs_info = [
         run for run in mlflow.list_run_infos(experiment.experiment_id, max_results=100000)
@@ -17,37 +16,55 @@ def main(tracking_uri: str, experiment_name: str) -> None:
     ]
 
     preprocessings = [
-        os.path.splitext(preproc)[0]
+        preproc.removesuffix('.py')
         for preproc in os.listdir('./src/core/preprocessings/')
         if preproc != 'resampler.py'
     ]
+
     metrics = [
         'accuracy', 'balanced_accuracy', 'precision', 'recall', 'f1', 'log_loss',
         'pr_auc', 'matthews_corr_coef', 'roc_auc', 'partial_roc_auc'
     ]
 
-    df = pd.DataFrame(index=preprocessings)
-    tables = {metric: df.copy() for metric in metrics}
+    tables: defaultdict[str, pd.DataFrame] = defaultdict(
+        lambda: pd.DataFrame(index=preprocessings, columns=metrics)
+    )
 
     for run_info in runs_info:
         run = mlflow.get_run(run_info.run_id)
         dataset = run.data.tags['dataset']
         preproc = run.data.tags['preprocessing']
 
-        for metric, value in run.data.metrics.items():
-            if metric in ('preprocessing_time', 'models_trained'):
-                continue
+        for metric in metrics:
+            tables[dataset].loc[preproc, metric] = np.nanmax(
+                [tables[dataset].loc[preproc, metric], run.data.metrics[metric]]
+            )
 
-            if dataset in tables[metric].columns:
-                tables[metric].loc[preproc, dataset] = np.nanmax(
-                    [tables[metric].loc[preproc, dataset], value]
-                )
-            else:
-                tables[metric].loc[preproc, dataset] = value
+    preprocessings = [
+        'Baseline', 'Random Oversampling', 'SMOTE', 'Borderline SMOTE', 'SVM SMOTE',
+        'KMeans SMOTE', 'ADASYN', 'Random Undersampling', 'CNN', 'ENN', 'Repeated ENN',
+        'All KNN', 'Near Miss', 'Tomek Links', 'One-Sided Selection', 'NCL', 'Cluster Centroids'
+    ]
 
-    for metric, table in tables.items():
-        table.fillna(value='x', inplace=True)
-        table.to_html(f'./tables/{metric}.html')
+    metrics = [
+        'Accuracy', 'B. Accuracy', 'Precision', 'Recall', 'F1', 'Log Loss',
+        'PR AUC', 'M. Corr. Coeff.', 'ROC AUC', 'PROC AUC'
+    ]
+
+    for dataset, df in tables.items():
+        df.index = preprocessings
+        df.columns = metrics
+        df.fillna('N/A', inplace=True)
+
+        df.to_latex(f'./thesis/tables/{dataset}_metrics.tex')
+
+    return tables
+
+
+def main(tracking_uri: str, experiment_name: str) -> None:
+    mlflow.set_tracking_uri(tracking_uri)
+
+    scores_by_dataset(experiment_name)
 
 
 if __name__ == '__main__':
