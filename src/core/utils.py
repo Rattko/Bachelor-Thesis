@@ -11,7 +11,9 @@ import pandas as pd
 from core.dataset import Dataset
 
 
-OVERSAMPLING_METHODS = {'random_oversampling', 'smote', 'svm_smote', 'k_means_smote', 'adasyn'}
+OVERSAMPLING_METHODS = {
+    'random_oversampling', 'smote', 'borderline_smote', 'svm_smote', 'k_means_smote', 'adasyn'
+}
 
 
 def load_dataset(path: str) -> Dataset | tuple[np.ndarray, np.ndarray]:
