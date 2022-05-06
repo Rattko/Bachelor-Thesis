@@ -2,7 +2,6 @@
 
 import importlib
 import lzma
-import os
 import pickle
 from collections import defaultdict
 
@@ -10,17 +9,31 @@ import mlflow
 import numpy as np
 import pandas as pd
 from mlflow.entities.run_info import RunInfo
+from tqdm import tqdm
 
 from core.utils import get_resampler_name
 
 
-# Names of datasets ordered by the level of imbalance in descending order
-datasets_pretty = [
-    'Asteroid', 'Credit Card Subset', 'Credit Card', 'PC2', 'MC1', 'Employee Turnover',
-    'Satellite', 'BNG - Solar Flare', 'Mammography', 'Letter', 'Relevant Images',
-    'Click Prediction V1', 'Click Prediction V2', 'Amazon Employee', 'BNG - Sick',
-    'Sylva Prior', 'BNG - Spect'
-]
+# Names of datasets and their IDs ordered by the level of imbalance in descending order
+datasets = {
+    '42252': 'Asteroid',
+    '4154': 'Credit Card Subset',
+    '1597': 'Credit Card',
+    '1069': 'PC2',
+    '1056': 'MC1',
+    '43551': 'Employee Turnover',
+    '40900': 'Satellite',
+    '1178': 'BNG - Solar Flare',
+    '310': 'Mammography',
+    '977': 'Letter',
+    '42680': 'Relevant Images',
+    '1216': 'Click Prediction V1',
+    '1217': 'Click Prediction V2',
+    '4135': 'Amazon Employee',
+    '131': 'BNG - Sick',
+    '1040': 'Sylva Prior',
+    '1180': 'BNG - Spect'
+}
 
 # Names of preprocessing methods in the order of appearance in the thesis
 preprocessings = [
@@ -50,19 +63,20 @@ metrics_pretty = [
 def datasets_stats(to_latex: bool = False) -> pd.DataFrame:
     stats = pd.DataFrame(columns=['name', 'size', 'majority_size', 'minority_size', 'imbalance'])
 
-    for dataset_filename in os.listdir('./datasets/'):
-        with lzma.open(f'./datasets/{dataset_filename}', 'rb') as dataset_file:
+    for dataset_filename in tqdm(datasets.keys(), desc='Generating Datasets Stats', leave=False):
+        with lzma.open(f'./datasets/{dataset_filename}.pickle', 'rb') as dataset_file:
             dataset = pickle.load(dataset_file)
 
         stats.loc[len(stats)] = dataset.to_dict()
 
     stats.sort_values(by='imbalance', ascending=False, inplace=True)
 
+    stats['name'] = (datasets.values())
     stats.columns = ['Name', 'Size', 'Majority Samples', 'Minority Samples', 'Imbalance']
-    stats['name'] = datasets_pretty
 
     if to_latex:
-        stats.to_latex('./thesis/tables/datasets.tex', index=False, label='table:dataset')
+        styler = stats.style.format(na_rep='N/A', precision=3).hide()
+        styler.to_latex('./thesis/tables/datasets.tex', hrules=True, label='table:datasets')
 
     return stats
 
@@ -77,15 +91,16 @@ def preprocessings_configurations(to_latex: bool = False) -> pd.DataFrame:
         configs.loc[len(configs)] = [preprocessing_pretty, len(list(resampler_cls.hyperparams()))]
 
     if to_latex:
-        configs.to_latex('./thesis/tables/configurations.tex', index=False, label='table:configs')
+        styler = configs.style.format(na_rep='N/A', precision=3).hide()
+        styler.to_latex('./thesis/tables/configurations.tex', hrules=True, label='table:configs')
 
     return configs
 
 
 def preprocessing_time(runs_info: list[RunInfo], to_latex: bool = False) -> pd.DataFrame:
-    times = pd.DataFrame(index=preprocessings)
+    times = pd.DataFrame(index=preprocessings, columns=list(datasets.keys()))
 
-    for run_info in runs_info:
+    for run_info in tqdm(runs_info, desc='Gathering Preprocessing Times', leave=False):
         run = mlflow.get_run(run_info.run_id)
         dataset = run.data.tags['dataset']
         preproc = run.data.tags['preprocessing']
@@ -95,10 +110,12 @@ def preprocessing_time(runs_info: list[RunInfo], to_latex: bool = False) -> pd.D
         else:
             times.loc[preproc, dataset] = 0.0
 
-    times.fillna(value='N/A', inplace=True)
+    times.index = preprocessings_pretty
+    times.columns = list(datasets.values())
 
     if to_latex:
-        times.to_latex('./thesis/tables/preprocessing_time.tex')
+        styler = times.style.format(na_rep='N/A', precision=3)
+        styler.to_latex('./thesis/tables/preprocessing_time.tex', hrules=True, label='table:times')
 
     return times
 
@@ -110,7 +127,7 @@ def scores_by_dataset(
         lambda: pd.DataFrame(index=preprocessings, columns=metrics)
     )
 
-    for run_info in runs_info:
+    for run_info in tqdm(runs_info, desc='Gathering Scores', leave=False):
         run = mlflow.get_run(run_info.run_id)
         dataset = run.data.tags['dataset']
         preproc = run.data.tags['preprocessing']
@@ -124,10 +141,10 @@ def scores_by_dataset(
         frame.index = preprocessings_pretty
         frame.columns = metrics_pretty
 
-        # Round all values to 3 decimal places and replace NaNs
-        frame = frame.apply(lambda x: np.around(x.astype(float), 3)).fillna('N/A')
-
         if to_latex:
+            styler = frame.style.format(na_rep='N/A', precision=3) \
+                        .highlight_max(props='textbf:--rwrap;')
+
             with open(f'./thesis/tables/{dataset}_metrics.tex', 'w', encoding='utf-8') as table:
                 contents = (
                     r'\clearpage' '\n'
@@ -136,7 +153,7 @@ def scores_by_dataset(
                     r'    \widesplit{' '\n'
                     r'        \makebox[\textwidth]{' '\n'
                     r'            \begin{tabularx}{\textwidth}{lRRRR}' '\n'
-                    f'                {frame.to_latex()}'
+                    f'                {styler.to_latex(hrules=True)}'
                     r'            \end{tabularx}' '\n'
                     r'        }' '\n'
                     r'    }' '\n'
