@@ -12,7 +12,7 @@ class Dataset:
 
     Attributes
     ----------
-    dataset_id : int
+    dataset_id : int | str
         Integer ID to identify the dataset uniquely.
     name : str
         Name of the dataset.
@@ -32,7 +32,7 @@ class Dataset:
         Vector containing target values of shape (n_samples,).
     """
 
-    dataset_id: int
+    dataset_id: int | str
     name: str
     size: int
     majority_size: int
