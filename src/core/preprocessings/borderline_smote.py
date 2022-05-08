@@ -1,3 +1,5 @@
+""" Module wrapping BorderlineSMOTE from Imbalanced Learn. """
+
 from imblearn.over_sampling import BorderlineSMOTE
 
 from core.logger import Logger
@@ -5,6 +7,20 @@ from core.preprocessings.resampler import Resampler
 
 
 class BorderlineSmoteResampler(Resampler):
+    """ Wrapper over BorderlineSMOTE from Imbalanced Learn.
+
+    Attributes
+    ----------
+    _hyperparams : dict[str, Any]
+        Dictionary containing names and possible values of hyperparameters of the resampler.
+
+    See Also
+    --------
+    The documentation and description for this and many more methods [1].
+
+    [1]: https://imbalanced-learn.org/stable/index.html
+    """
+
     _hyperparams = {
         'sampling_strategy': [0.75, 1.0],
         'k_neighbors': [5, 10],
