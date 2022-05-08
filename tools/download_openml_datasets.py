@@ -124,6 +124,13 @@ def get_dataset(dataset: Dataset, directory: str) -> None:
     dataset.data = pipeline.fit_transform(data)
     dataset.target = LabelEncoder().fit_transform(target)
 
+    # Labels are swapped, i.e. the positive class has label 0 and the negative class has label 1
+    if len(dataset.target[dataset.target == 1]) > len(dataset.target[dataset.target == 0]):
+        dataset.target = np.where(
+            (dataset.target == 0) | (dataset.target == 1),
+            dataset.target ^ 1, dataset.target
+        )
+
     with lzma.open(f'{directory}/{dataset.dataset_id}.pickle', mode='wb') as dataset_file:
         pickle.dump(dataset, dataset_file)
 
@@ -135,7 +142,8 @@ def main(args: argparse.Namespace, blacklist: list[str]) -> None:
     )
     datasets = [dataset for dataset in datasets if dataset.name not in blacklist]
     downloaded_datasets = [
-        x.removesuffix('.pickle') for x in os.listdir(args.directory) if x.endswith('.pickle')
+        x.removesuffix('.pickle') for x in os.listdir(args.directory)
+        if x.endswith('.pickle') and x != 'unsw.pickle'
     ]
 
     if args.wipe_datasets:
