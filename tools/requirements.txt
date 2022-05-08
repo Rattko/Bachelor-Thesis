@@ -8,3 +8,8 @@ mlflow==1.25.1
 kaggle==1.5.12
 openml==0.12.2
 tqdm==4.62.3
+
+pylint==2.13.7
+pylama==8.3.8
+flake8==4.0.1
+mypy==0.942
