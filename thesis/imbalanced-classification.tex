@@ -370,6 +370,74 @@ summarised in pseudocode in the following way:
     \end{algorithmic}
 \end{algorithm}
 
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{figures/all_knn.eps}
+    \caption{
+        \textbf{Undersampling using All KNN.} The figure shows the original dataset in the leftmost
+        plot. The majority samples selected by the All KNN method with the hyperparameter $k = 7$
+        are highlighted in the centre plot. The last plot shows the dataset after removing the
+        highlighted samples from the middle plot. Note that for the purposes of illustration, we
+        only kept the majority samples if their labels matched the labels of all their neighbours,
+        as opposed to the described original approach.
+    }
+    \label{figure:all-knn}
+\end{figure}
+
+
+\subsection{Near Miss}
+\label{subsection:near-miss}
+
+Near Miss~\cite{near-miss} refers to a group of three undersampling methods that use kNN to select
+majority class samples to retain. The three methods are Near Miss 1, Near Miss 2 and Near Miss 3.
+
+\begin{enumerate}
+    \item \textbf{Near Miss 1} selects majority samples that exhibit the smallest average distance
+        to $\mathrm{N}$ closest minority samples
+    \item \textbf{Near Miss 2} selects majority samples that exhibit the smallest average distance
+        to $\mathrm{N}$ furthest minority samples
+    \item \textbf{Near Miss 3} selects a given number of closest majority samples for each minority
+        sample
+\end{enumerate}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{figures/near_miss.eps}
+    \caption{
+        \textbf{Undersampling using Near Miss 1, 2 and 3.} The plot shows the original dataset in
+        the upper left corner and resulting dataset after applying each of the three Near Miss
+        methods in the remaining plots.
+    }
+    \label{figure:near-miss}
+\end{figure}
+
+
+\subsection{Tomek Links}
+\label{subsection:tomek-links}
+
+Tomek Links~\cite{tomek-links} is a data cleaning technique used to clean the area near the
+decision boundary and to remove noisy samples. A pair of points $\mathbf{x}_i~\in~S_{min}$,
+$\mathbf{x}_j~\in~S_{maj}$ belonging to the opposite classes form a Tomek Link if there does not
+exist a sample $\mathbf{x}_k$ such that $\mathrm{d}(\mathbf{x}_i, \mathbf{x}_k) \leq
+\mathrm{d}(\mathbf{x}_i, \mathbf{x}_j)$ or $\mathrm{d}(\mathbf{x}_j, \mathbf{x}_k) \leq
+\mathrm{d}(\mathbf{x}_i, \mathbf{x}_j)$. The algorithm identifies samples from the majority class
+participating in the Tomek Links and removes them, achieving a more pronounced decision boundary
+and cleaner data, as depicted in Figure~\ref{figure:tomek-links}. Tomek Links are often used after
+an oversampling method, such as SMOTE~\ref{subsection:smote}, to remove noisy samples introduced
+during oversampling~\cite{learning-from-imb-data, batista2004}.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{figures/tomek_links.eps}
+    \caption{
+        \textbf{Undersampling using Tomek Links.} The figure shows the Tomek Links cleaning method.
+        The left plot shows the original dataset; the middle one reveals samples belonging to the
+        majority class identified as Tomek Links in brown colour. Finally, the rightmost plot
+        displays the cleaned dataset.
+    }
+    \label{figure:tomek-links}
+\end{figure}
+
 
 \subsection{One-Sided Selection}
 \label{subsection:one-side-selection}
