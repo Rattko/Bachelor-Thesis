@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
 import importlib
+import json
 import lzma
+import os
 import pickle
 from collections import defaultdict
 
@@ -51,12 +53,12 @@ preprocessings_pretty = [
 ]
 
 metrics = [
-    'balanced_accuracy', 'precision', 'recall', 'f1', 'pr_auc',
+    'balanced_accuracy', 'precision', 'recall', 'f1_max', 'pr_auc',
     'matthews_corr_coef', 'roc_auc', 'partial_roc_auc'
 ]
 
 metrics_pretty = [
-    'B. Accuracy', 'Precision', 'Recall', 'F1', 'PR AUC', 'MCCoeff', 'ROC AUC', 'P-ROC AUC'
+    'B. Accuracy', 'Precision', 'Recall', 'F1 Max', 'PR AUC', 'MCC', 'ROC AUC', 'P-ROC AUC'
 ]
 
 
@@ -90,6 +92,8 @@ def preprocessings_configurations(to_latex: bool = False) -> pd.DataFrame:
 
         configs.loc[len(configs)] = [preprocessing_pretty, len(list(resampler_cls.hyperparams()))]
 
+    configs.loc[len(configs)] = [r'$\Sigma$', sum(configs['Hyperparameter Configurations'])]
+
     if to_latex:
         styler = configs.style.format(na_rep='N/A', precision=3).hide()
         styler.to_latex('./thesis/tables/configurations.tex', hrules=True, label='table:configs')
@@ -120,8 +124,46 @@ def preprocessing_time(runs_info: list[RunInfo], to_latex: bool = False) -> pd.D
     return times
 
 
+def calculate_f1_max(artifact_uri: str) -> float:
+    mlflow.artifacts.download_artifacts(f'{artifact_uri}/data_pr_curve.json', dst_path='.')
+
+    with open('data_pr_curve.json', 'r') as data_file:
+        data = json.load(data_file)
+
+    os.remove('data_pr_curve.json')
+
+    data.pop('thresholds')
+    scores = pd.DataFrame.from_dict(data)
+
+    scores['f1_max'] = (
+        2 * scores['precision'] * scores['recall'] / (scores['precision'] + scores['recall'])
+    )
+
+    return max(scores['f1_max'])
+
+
+def ranks_by_dataset(
+    scores: defaultdict[str, pd.DataFrame], to_latex: bool = False
+) -> defaultdict[str, pd.DataFrame]:
+    ranks: defaultdict[str, pd.DataFrame] = defaultdict()
+
+    for dataset, frame in scores.items():
+        ranks[dataset] = frame.rank(ascending=False)
+        ranks[dataset].index = preprocessings_pretty
+        ranks[dataset].columns = metrics_pretty
+
+        if to_latex:
+            styler = ranks[dataset].style.format(na_rep='N/A', precision=1) \
+                        .highlight_min(props='textbf:--rwrap;')
+            styler.to_latex(
+                f'./thesis/tables/{dataset}_ranks.tex', hrules=True, label='table:ranks'
+            )
+
+    return ranks
+
+
 def scores_by_dataset(
-    runs_info: list[RunInfo], to_latex: bool = False
+    runs_info: list[RunInfo], ranks: bool = False, to_latex: bool = False
 ) -> defaultdict[str, pd.DataFrame]:
     tables: defaultdict[str, pd.DataFrame] = defaultdict(
         lambda: pd.DataFrame(index=preprocessings, columns=metrics)
@@ -133,9 +175,18 @@ def scores_by_dataset(
         preproc = run.data.tags['preprocessing']
 
         for metric in metrics:
+            if metric == 'f1_max':
+                tables[dataset].loc[preproc, metric] = np.nanmax(
+                    [tables[dataset].loc[preproc, metric], calculate_f1_max(run_info.artifact_uri)]
+                )
+                continue
+
             tables[dataset].loc[preproc, metric] = np.nanmax(
                 [tables[dataset].loc[preproc, metric], run.data.metrics[metric]]
             )
+
+    if ranks:
+        ranks_by_dataset(tables, to_latex=True)
 
     for dataset, frame in tables.items():
         frame.index = preprocessings_pretty
@@ -150,6 +201,7 @@ def scores_by_dataset(
                     r'\clearpage' '\n'
                     r'\begin{table}' '\n'
                     r'    \centering' '\n'
+                    r'    \setlength\tabcolsep{2pt}' '\n'
                     r'    \widesplit{' '\n'
                     r'        \makebox[\textwidth]{' '\n'
                     r'            \begin{tabularx}{\textwidth}{lRRRR}' '\n'
@@ -178,7 +230,7 @@ def main(tracking_uri: str, experiment_name: str) -> None:
     datasets_stats(to_latex=True)
     preprocessings_configurations(to_latex=True)
     preprocessing_time(runs_info, to_latex=True)
-    scores_by_dataset(runs_info, to_latex=True)
+    scores_by_dataset(runs_info, ranks=True, to_latex=True)
 
 
 if __name__ == '__main__':
