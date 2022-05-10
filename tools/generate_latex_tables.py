@@ -124,6 +124,37 @@ def preprocessing_time(runs_info: list[RunInfo], to_latex: bool = False) -> pd.D
     return times
 
 
+def mean_rank(scores: defaultdict[str, pd.DataFrame], to_latex: bool = False) -> pd.DataFrame:
+    ranks = [df.rank(ascending=False) for df in scores.values()]
+    mean_rank = pd.DataFrame(index=ranks[0].index, columns=ranks[0].columns)
+
+    for row in ranks[0].index:
+        for col in ranks[0].columns:
+            rank_sum, rank_count = 0, 0
+
+            for df in ranks:
+                value = df.loc[row, col]
+
+                if not np.isnan(value):
+                    rank_sum += value
+                    rank_count += 1
+
+            if rank_count == 0:
+                mean_rank.loc[row, col] = 'N/A'
+            else:
+                mean_rank.loc[row, col] = f'{rank_sum / rank_count :.3f} // {rank_count}'
+
+    mean_rank.index = preprocessings_pretty
+    mean_rank.columns = metrics_pretty
+
+    if to_latex:
+        mean_rank.style.to_latex(
+            f'./thesis/tables/mean_rank.tex', hrules=True, label='table:mean_rank'
+        )
+
+    return mean_rank
+
+
 def calculate_f1_max(artifact_uri: str) -> float:
     mlflow.artifacts.download_artifacts(f'{artifact_uri}/data_pr_curve.json', dst_path='.')
 
@@ -140,26 +171,6 @@ def calculate_f1_max(artifact_uri: str) -> float:
     )
 
     return max(scores['f1_max'])
-
-
-def ranks_by_dataset(
-    scores: defaultdict[str, pd.DataFrame], to_latex: bool = False
-) -> defaultdict[str, pd.DataFrame]:
-    ranks: defaultdict[str, pd.DataFrame] = defaultdict()
-
-    for dataset, frame in scores.items():
-        ranks[dataset] = frame.rank(ascending=False)
-        ranks[dataset].index = preprocessings_pretty
-        ranks[dataset].columns = metrics_pretty
-
-        if to_latex:
-            styler = ranks[dataset].style.format(na_rep='N/A', precision=1) \
-                        .highlight_min(props='textbf:--rwrap;')
-            styler.to_latex(
-                f'./thesis/tables/{dataset}_ranks.tex', hrules=True, label='table:ranks'
-            )
-
-    return ranks
 
 
 def scores_by_dataset(
@@ -186,7 +197,7 @@ def scores_by_dataset(
             )
 
     if ranks:
-        ranks_by_dataset(tables, to_latex=True)
+        mean_rank(tables, to_latex=True)
 
     for dataset, frame in tables.items():
         frame.index = preprocessings_pretty
@@ -209,7 +220,7 @@ def scores_by_dataset(
                     r'            \end{tabularx}' '\n'
                     r'        }' '\n'
                     r'    }' '\n'
-                    r'    \caption{}' '\n'
+                    fr'    \caption{{\textbf{{{datasets[dataset]}}}}}' '\n'
                     r'    \label{table:}' '\n'
                     r'\end{table}'
                 )
