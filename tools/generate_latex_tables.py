@@ -7,6 +7,7 @@ import os
 import pickle
 from collections import defaultdict
 
+import matplotlib.pyplot as plt
 import mlflow
 import numpy as np
 import pandas as pd
@@ -14,6 +15,11 @@ from mlflow.entities.run_info import RunInfo
 from tqdm import tqdm
 
 from core.utils import get_resampler_name
+
+
+# Colours for violin plots
+YELLOW = '#ECB53A'
+BROWN = '#5E4947'
 
 
 # Names of datasets and their IDs ordered by the level of imbalance in descending order
@@ -99,6 +105,37 @@ def preprocessings_configurations(to_latex: bool = False) -> pd.DataFrame:
         styler.to_latex('./thesis/tables/configurations.tex', hrules=True, label='table:configs')
 
     return configs
+
+
+def plot_mean_preproc_time(runs_info: list[RunInfo]) -> None:
+    times = defaultdict(list)
+
+    for run_info in tqdm(runs_info, desc='Gathering Preprocessing Times', leave=False):
+        run = mlflow.get_run(run_info.run_id)
+        preproc = run.data.tags['preprocessing']
+
+        if preproc != 'baseline':
+            times[preproc].append(float(run.data.metrics['preprocessing_time']))
+
+    fig = plt.figure(figsize=(16, 8))
+
+    parts = plt.violinplot(
+        times.values(), vert=False, showmeans=True,
+        quantiles=[[0.25, 0.5, 0.75] for _ in range(len(times))]
+    )
+
+    ticks_pretty = [preprocessings_pretty[preprocessings.index(name)] for name in times.keys()]
+
+    plt.yticks(np.arange(1, len(times) + 1), ticks_pretty, rotation=45)
+
+    # Set colours of violin plots
+    parts['cmeans'].set_color(BROWN)
+    parts['cquantiles'].set_color(YELLOW)
+
+    plt.savefig('./thesis/figures/preprocessing_times.eps', bbox_inches='tight')
+    # plt.show()
+
+    plt.close(fig)
 
 
 def preprocessing_time(runs_info: list[RunInfo], to_latex: bool = False) -> pd.DataFrame:
