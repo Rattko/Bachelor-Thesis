@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import mlflow
 import numpy as np
 import pandas as pd
+import scipy.stats as ss
 from mlflow.entities.run_info import RunInfo
 from tqdm import tqdm
 
@@ -117,15 +118,16 @@ def plot_mean_preproc_time(runs_info: list[RunInfo]) -> None:
         if preproc != 'baseline':
             times[preproc].append(float(run.data.metrics['preprocessing_time']))
 
-    fig = plt.figure(figsize=(16, 8))
+    fig = plt.figure(figsize=(8.2, 11.6))
 
     parts = plt.violinplot(
         times.values(), vert=False, showmeans=True,
         quantiles=[[0.25, 0.5, 0.75] for _ in range(len(times))]
     )
 
-    ticks_pretty = [preprocessings_pretty[preprocessings.index(name)] for name in times.keys()]
+    plt.xscale('log')
 
+    ticks_pretty = [preprocessings_pretty[preprocessings.index(name)] for name in times.keys()]
     plt.yticks(np.arange(1, len(times) + 1), ticks_pretty, rotation=45)
 
     # Set colours of violin plots
@@ -185,9 +187,25 @@ def mean_rank(scores: defaultdict[str, pd.DataFrame], to_latex: bool = False) ->
     mean_rank.columns = metrics_pretty
 
     if to_latex:
-        mean_rank.style.to_latex(
-            f'./thesis/tables/mean_rank.tex', hrules=True, label='table:mean_rank'
-        )
+        with open(f'./thesis/tables/mean_rank.tex', 'w', encoding='utf-8') as table:
+            contents = (
+                r'\clearpage' '\n'
+                r'\begin{table}' '\n'
+                r'    \centering' '\n'
+                r'    \setlength\tabcolsep{2pt}' '\n'
+                r'    \widesplit{' '\n'
+                r'        \makebox[\textwidth]{' '\n'
+                r'            \begin{tabularx}{\textwidth}{lRRRR}' '\n'
+                f'                {mean_rank.style.to_latex(hrules=True)}'
+                r'            \end{tabularx}' '\n'
+                r'        }' '\n'
+                r'    }' '\n'
+                r'    \caption{\textbf{Mean Rank Across All Datasets.}}' '\n'
+                r'    \label{table:mean_rank}' '\n'
+                r'\end{table}'
+            )
+
+            table.write(contents)
 
     return mean_rank
 
@@ -210,8 +228,29 @@ def calculate_f1_max(artifact_uri: str) -> float:
     return max(scores['f1_max'])
 
 
+def friedman_test(tables: defaultdict[str, pd.DataFrame]) -> pd.DataFrame:
+    scores = defaultdict(list)
+    results = pd.DataFrame(index=['Statistic', 'P Value'], columns=metrics)
+
+    for frame in tables.values():
+        for metric in metrics:
+            scores[metric].append(frame.loc[:, metric])
+
+    for metric, metric_scores in scores.items():
+        metric_scores = pd.concat(metric_scores, axis=1).T
+        result = ss.friedmanchisquare(*[metric_scores[col] for col in metric_scores.columns])
+
+        results.loc['Statistic', metric] = result.statistic
+        results.loc['P Value', metric] = result.pvalue
+
+    results.columns = metrics_pretty
+
+    return results
+
+
 def scores_by_dataset(
-    runs_info: list[RunInfo], ranks: bool = False, to_latex: bool = False
+    runs_info: list[RunInfo], compute_mean_rank: bool = False,
+    test: bool = False, to_latex: bool = False
 ) -> defaultdict[str, pd.DataFrame]:
     tables: defaultdict[str, pd.DataFrame] = defaultdict(
         lambda: pd.DataFrame(index=preprocessings, columns=metrics)
@@ -233,8 +272,11 @@ def scores_by_dataset(
                 [tables[dataset].loc[preproc, metric], run.data.metrics[metric]]
             )
 
-    if ranks:
-        mean_rank(tables, to_latex=True)
+    if compute_mean_rank:
+        mean_rank(tables, to_latex=to_latex)
+
+    if test:
+        friedman_test(tables)
 
     for dataset, frame in tables.items():
         frame.index = preprocessings_pretty
@@ -275,10 +317,8 @@ def main(tracking_uri: str, experiment_name: str) -> None:
         if run.status == 'FINISHED'
     ]
 
-    datasets_stats(to_latex=True)
-    preprocessings_configurations(to_latex=True)
-    preprocessing_time(runs_info, to_latex=True)
-    scores_by_dataset(runs_info, ranks=True, to_latex=True)
+    plot_mean_preproc_time(runs_info)
+    scores_by_dataset(runs_info, compute_mean_rank=True, test=True, to_latex=True)
 
 
 if __name__ == '__main__':
