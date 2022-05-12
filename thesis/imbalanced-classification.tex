@@ -1,6 +1,58 @@
 \chapter{Imbalanced Classification}
 \label{chapter:imb-classif}
 
+The imbalanced classification problem emerges when the dataset we train a classifier on exhibits an
+unequal distribution between individual classes. We call this a \emph{between-class}
+imbalance~\cite{learning-from-imb-data}. Imbalanced datasets can be found in both binary and
+multi-class settings. However, for the sake of simplicity and consistency with other authors and
+publications, we shall focus only on the binary case. The generalisation to the multi-class setting
+can be easily achieved by employing one-vs-one or one-vs-rest schemes to preprocessing methods and
+micro and macro averaging to evaluation metrics. In binary classification, we talk about a
+\emph{majority} class, which is a class that most of the samples belong to, and a \emph{minority}
+class. The minority class is usually considered more important. We can use \emph{ratios} to
+represent the degree of imbalance present in the dataset. For example, 1000:1 means there are 1000
+samples in the majority class for each sample from the minority class.
+
+Between-class imbalance naturally occurs in many domains due to various reasons. When the reason
+for the imbalance is the skewness of the underlying distribution of data, we call this imbalance
+\emph{intrinsic}~\cite{learning-from-imb-data}. On the other hand, when the underlying distribution
+is perfectly (or almost perfectly) balanced, and the imbalance in the data is acquired as a result
+of other factors, such as unreliable storage or transport of data, we call this an \emph{extrinsic}
+imbalance. Another possible way of classification of imbalance is into \emph{relative} and
+\emph{absolute} imbalance. We talk about relative imbalance when there is a considerable
+underrepresentation of the minority class compared to the majority class, but the minority class is
+not rare on its own. On the other hand, when the minority class contains only a handful of scarce
+examples to observe, we talk about the absolute imbalance.
+
+Imbalance in any form can severely compromise the performance of standard machine learning
+algorithms, such as decision trees, support vector machines, and so on. These classifiers expect
+approximately a balanced distribution of samples into classes~\cite{gosain2017}. There are various
+methods available to aid the shortcomings of these algorithms in the imbalance problem settings.
+They can be divided into these three categories:
+
+\begin{enumerate}
+    \item \emph{Data-Level methods} are applied to the training part of the dataset before the
+        training phase of the pipeline; thus, they can be labelled as \emph{preprocessing} methods.
+        These methods aim to change the distribution of samples between classes to allow us to use
+        unmodified classification algorithms. Based on their targeted class, preprocessing methods
+        can further be divided into oversampling and undersampling methods. Oversampling methods
+        increase the number of minority samples, whilst the undersampling methods reduce the number
+        of samples in the majority class by discarding some of them.
+
+    \item \emph{Algorithm-Level methods} reverse the previous approach by not modifying the dataset
+        but modifying the classification algorithm instead. This approach requires either
+        developing new specialised classification algorithms or modifying existing ones. These
+        methods are further divided into \emph{cost-sensitive} methods and \emph{ensemble} methods.
+        The cost-sensitive methods assign different misclassification costs to different classes.
+        Ensemble methods combine more weak classifiers into a single strong classifier.
+
+    \item \emph{Hybrid methods} use a combination of data-level and algorithm-level methods.
+\end{enumerate}
+
+This text focuses on the data level approaches, consisting of oversampling and undersampling
+preprocessing methods. We shall describe several resampling methods in the following sections.
+These preprocessing methods are used in an experiment described in later chapters.
+
 
 \section{Oversampling Methods}
 \label{section:oversampling-methods}
@@ -21,7 +73,7 @@ the available data samples belonging to that class. Samples to duplicate are cho
 replacement. Bare duplication of samples may introduce completely overlapping samples, as shown in
 the left scatter plot in Figure~\ref{figure:random-oversampling}. Random oversampling introduced
 sixty new minority samples to balance the classes; however, we can only see twenty, as most of them
-are entirely overlapping. A modification known as \textit{Random Oversampling Examples} (ROSE) was
+are entirely overlapping. A modification known as \emph{Random Oversampling Examples} (ROSE) was
 proposed in 2012 to avoid this~\cite{rose}. It starts by randomly choosing a sample from the
 minority class and then generates a new artificial sample in the close neighbourhood of the
 original sample. Generating new samples close to the already existing ones enlarges the regions
@@ -51,16 +103,16 @@ determines if all minority samples participate in the oversampling. If we plan t
 minority class by at least 100\%, then every existing minority sample is used; otherwise, a random
 subset $\mathcal{S} \subseteq {S_{min}}$ of samples is chosen. The algorithm looks at k-nearest
 neighbours, where $k$ is again a hyperparameter supplied by the user, of an existing minority
-example $\mathbf{x}_i$ and randomly chooses a subset of the neighbours $\mathcal{N} =
-\{\,\mathbf{x} \mid \mathbf{x} \in \mathrm{kNN}(\mathbf{x}_i)\,\}$. The subset's size also depends
-on the amount of oversampling we plan to do. If, for example, we plan to oversample the minority
-class by 200\%, then for each existing minority sample, the subset will contain two randomly chosen
-neighbours. If, on the other hand, the amount of oversampling is less than 100\%, the algorithm
-generates one new artificial sample for each existing sample in the subset $\mathcal{S}$. For each
-neighbour $\mathbf{x}_j \in \mathcal{N}$, the algorithm computes the difference between
-$\mathbf{x}_i$ and $\mathbf{x}_j$, multiplies it by a random number $r$ chosen uniformly from the
-interval $(0, 1)$, and finally adds it to the original sample $\mathbf{x}_i$. The final formula for
-generating a new artificial sample is:
+example $\mathbf{x}_i$ and randomly chooses a subset of the neighbours $\mathcal{N} = \{\mathbf{x}
+\mid \mathbf{x} \in \mathrm{kNN}(\mathbf{x}_i)\}$. The subset's size also depends on the amount of
+oversampling we plan to do. If, for example, we plan to oversample the minority class by 200\%,
+then for each existing minority sample, the subset will contain two randomly chosen neighbours. If,
+on the other hand, the amount of oversampling is less than 100\%, the algorithm generates one new
+artificial sample for each existing sample in the subset $\mathcal{S}$. For each neighbour
+$\mathbf{x}_j \in \mathcal{N}$, the algorithm computes the difference between $\mathbf{x}_i$ and
+$\mathbf{x}_j$, multiplies it by a random number $r$ chosen uniformly from the interval $(0, 1)$,
+and finally adds it to the original sample $\mathbf{x}_i$. The final formula for generating a new
+artificial sample is:
 \begin{equation}
     \mathbf{x}_{new} = \mathbf{x}_i + r \cdot (\mathbf{x}_i - \mathbf{x}_j)
     \label{equation:smote}
@@ -81,8 +133,8 @@ their neighbours belonging to the majority class. One interesting case is when a
 neighbours of a minority sample belong to the majority class. In this case, the minority sample is
 considered noise in the data and is not selected. These conditions can be summarised as follow:
 \begin{equation}
-    \mathcal{S} = \{\mathbf{x} \mid \mathbf{x} \in S_{min} \land \frac{k}{2} \leq \, \mid
-        \mathrm{kNN}(\mathbf{x}_i) \cap S_{maj} \mid \, < k\}.
+    \mathcal{S} = \{\mathbf{x} \mid \mathbf{x} \in S_{min} \land \frac{k}{2} \leq \lvert
+        \mathrm{kNN}(\mathbf{x}_i) \cap S_{maj} \rvert < k\}.
 \end{equation}
 The resulting set $\mathcal{S}$ is sent to the SMOTE algorithm to generate new artificial samples
 on the border.
@@ -124,12 +176,12 @@ the algorithm performs extrapolation to enlarge the area occupied by the minorit
     \includegraphics[width=\linewidth]{figures/smote_vs_svmsmote.eps}
     \caption{
         \textbf{SMOTE vs SVM SMOTE.} The figure shows how SVM SMOTE, shown on the right, prefers
-        generating samples, shown in a brownish colour, near the decision boundary to strengthen
-        the presence of samples from the minority class. In contrast, the original implementation
-        of the SMOTE algorithm generates new samples near every original sample from the minority
-        class regardless of its position. Furthermore, we can see the interpolation in the dense
-        regions in the centre of the plot around the point $(0, 0)$ and the extrapolation on the
-        far right.
+        generating samples, shown in a dark brownish colour, near the decision boundary to
+        strengthen the presence of samples from the minority class. In contrast, the original
+        implementation of the SMOTE algorithm generates new samples near every original sample from
+        the minority class regardless of its position. Furthermore, we can see the interpolation in
+        the dense regions in the centre of the plot around the point $(0, 0)$ and the extrapolation
+        on the far right.
     }
     \label{figure:smote-vs-svmsmote}
 \end{figure}
@@ -157,8 +209,8 @@ for each cluster $f$, as follows:
 \begin{enumerate}
     \item calculate a distance matrix between minority samples belonging to cluster $f$
     \item calculate a mean distance $\mathrm{mean\_distance(f)}$
-    \item calculate the cluster's density as $\mathrm{density(f)} = \frac{\mid S_{min}
-        \mid}{\mathrm{mean\_distance(f)}^m}$, where $m$ is the dimension of a sample
+    \item calculate the cluster's density as $\mathrm{density(f)} = \frac{\lvert S_{min}
+        \rvert}{\mathrm{mean\_distance(f)}^m}$, where $m$ is the dimension of a sample
     \item calculate $\mathrm{sparsity(f)} = \frac{1}{\mathrm{density(f)}}$
 \end{enumerate}
 
@@ -194,7 +246,7 @@ weighting of the minority samples is the main difference between SMOTE and ADASY
 not consider the surroundings of minority samples. The ADASYN algorithm starts by calculating the
 number of samples that need to be generated using
 \begin{equation}
-    G = \beta \cdot (\mid S_{maj} \mid - \mid S_{min} \mid),
+    G = \beta \cdot (\lvert S_{maj} \rvert - \lvert S_{min} \rvert),
 \end{equation}
 where $\beta \in (0, 1)$ controls the level of desired imbalance after resampling.
 
@@ -202,13 +254,13 @@ Next, for each $\mathbf{x}_i \in S_{min}$, find its k-nearest neighbours using t
 distance in the feature space and calculate the portion $r_i$ of the majority samples in the
 neighbourhood.
 \begin{equation}
-    r_i = \frac{\mid \mathrm{kNN}(\mathbf{x}_i) \cap S_{maj} \mid}{k}.
+    r_i = \frac{\lvert \mathrm{kNN}(\mathbf{x}_i) \cap S_{maj} \rvert}{k}.
 \end{equation}
 
-Normalise $r_i$ to create a proper distribution, i.e. $\sum_{i = 1}^{\mid S_{min} \mid} r_i = 1$.
-Normalisation allows us to compute what fraction of all samples that need to be generated should be
-generated using each of the minority samples. The number of samples $g_i$ to generate for each
-$x_i$ is computed as
+Normalise $r_i$ to create a proper distribution, i.e. $\sum_{i = 1}^{\lvert S_{min} \rvert} r_i =
+1$. Normalisation allows us to compute what fraction of all samples that need to be generated
+should be generated using each of the minority samples. The number of samples $g_i$ to generate for
+each $x_i$ is computed as
 \begin{equation}
     g_i = r_i \cdot G.
 \end{equation}
@@ -233,12 +285,12 @@ each minority sample $x_i$.
 \label{section:undersampling-methods}
 
 Undersampling methods focus on the majority class, as opposed to the oversampling methods discussed
-in Section \ref{section:oversampling-methods}, to address the issue of the imbalanced
+in Section~\ref{section:oversampling-methods}, to address the issue of the imbalanced
 classification. These methods reduce the number of samples in the majority class to create a more
 balanced distribution of samples between classes. Most of the undersampling methods discussed are
-so-called \textit{prototype selection} methods. Prototype selection methods reduce the number of
+so-called \emph{prototype selection} methods. Prototype selection methods reduce the number of
 samples by removing unnecessary samples from the dataset and using only a subset of the original
-data. The Cluster Centroids method is the only example of a \textit{prototype generation} method
+data. The Cluster Centroids method is the only example of a \emph{prototype generation} method
 discussed in the thesis. Prototype generation methods reduce the number of samples by generating
 new samples, e.g. centroids of clusters obtained by the KMeans algorithm~\ref{section:kmeans},
 instead of using a subset of the original ones.
@@ -260,7 +312,7 @@ rule's stringent storage requirements, retaining the basic idea of the nearest n
 nearest neighbour rule works with the so-called stored reference set consisting of n examples that
 are correctly classified beforehand, for example, by a human annotator. A new sample is assigned
 the same class as its nearest neighbour in the reference set. The CNN rule reduces this potentially
-huge reference set to a \textit{consistent} set. The consistent set is a subset of the original
+huge reference set to a \emph{consistent} set. The consistent set is a subset of the original
 reference set. When used as the reference set in the NN rule, it correctly classifies all of the
 examples from the original reference set. CNN rule uses two sets called \texttt{STORE} and
 \texttt{GRABBAG} and works as follows:
@@ -282,7 +334,8 @@ examples from the original reference set. CNN rule uses two sets called \texttt{
 \end{enumerate}
 
 The CNN undersampling algorithm makes one change to this algorithm. It starts with \texttt{STORE} =
-$S_{min}$ and loops through examples in the majority class.
+$S_{min}$ and loops through examples in the majority class. We can see the results of applying CNN
+on an artificial dataset in Figure~\ref{figure:cnn}.
 
 \begin{figure}
     \centering
@@ -311,8 +364,8 @@ the ENN method in Figure~\ref{figure:enn}. Ivan Tomek proposed to repeat ENN mul
 reduce the number of majority samples further~\cite{repeated-enn}. The algorithm iteratively
 reduces the number of samples in the majority class until there is no reduction in the number of
 majority samples or the maximum number of iterations is reached. We refrain from showing a plot for
-the Repeated ENN method, as in this particular case, ENN and Repeated ENN produced the same
-results.
+the Repeated ENN method, as in this particular case, Repeated ENN did not reduce the number of
+samples in additional iterations any further and produced the same results as ENN.
 
 \begin{figure}
     \centering
@@ -330,7 +383,7 @@ results.
 \subsection{All KNN}
 \label{subsection:allknn}
 
-All KNN~\cite{repeated-enn}, also proposed by Ivan Tomek, uses the same idea as the two previous
+All~KNN~\cite{repeated-enn}, also proposed by Ivan Tomek, uses the same idea as the two previous
 preprocessing methods to eliminate samples from the majority class when there is a label
 disagreement between a sample under consideration and its k-nearest neighbours. However, instead of
 using a fixed number of neighbours to check an agreement, it starts by looking at the single
@@ -515,7 +568,7 @@ algorithm~\ref{section:kmeans} on the majority class with an appropriate number 
 achieve the desired resulting ratio of samples belonging to individual classes. Once the KMeans
 algorithm finishes, we output the cluster centroids as new majority class data.
 
-\begin{figure}
+\begin{figure}[t!]
     \centering
     \includegraphics[width=\linewidth]{figures/cluster_centroids.eps}
     \caption{
@@ -528,4 +581,5 @@ algorithm finishes, we output the cluster centroids as new majority class data.
         there is no such sample in the original dataset.
     }
     \label{figure:cluster-centroids}
+    \vspace*{5.2in}
 \end{figure}
