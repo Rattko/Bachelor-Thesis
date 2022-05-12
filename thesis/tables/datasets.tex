@@ -1,11 +1,10 @@
-\begin{table}
+\begin{table}[ht]
     \centering
 
     \begin{tabular}{lrrrr}
         \toprule
         Name & Size & Majority Size & Minority Size & Imbalance \\
         \midrule
-        Asteroid & 126131 & 125975 & 156 & 807.532 \\
         Credit Card Subset & 14240 & 14217 & 23 & 618.130 \\
         Credit Card & 284807 & 284315 & 492 & 577.876 \\
         PC2 & 5589 & 5566 & 23 & 242.000 \\
@@ -22,12 +21,16 @@
         BNG - Sick & 1000000 & 938761 & 61239 & 15.329 \\
         Sylva Prior & 14395 & 13509 & 886 & 15.247 \\
         BNG - Spect & 1000000 & 915437 & 84563 & 10.826 \\
+        \midrule
+        Graph - Embedding & 548 & 394 & 154 & 2.558 \\
+        Graph - Raw & 548 & 394 & 154 & 2.558 \\
         \bottomrule
     \end{tabular}
 
     \caption{
-        \textbf{Public Datasets.} The table shows basic information about public datasets used in
-        the experiments.
+        \textbf{Datasets.} The table shows basic information about the datasets used in the
+        experiments. The upper part of the table shows publicly available datasets; the lower part
+        shows two Cisco's proprietary datasets.
     }
     \label{table:datasets}
 \end{table}
