@@ -1,0 +1,34 @@
+\clearpage
+\begin{table}
+    \centering
+    \setlength\tabcolsep{2pt}
+    \widesplit{
+        \makebox[\textwidth]{
+            \begin{tabularx}{\textwidth}{lRRRR}
+                \toprule
+                & \row{B. Accuracy & Precision & Recall & F1 Max}{PR AUC & MCC & ROC AUC & P-ROC AUC} \\
+                \midrule
+                Baseline & \row{0.995 & 0.995 & 0.990 & 0.995}{1.000 & 0.992 & 1.000 & 1.000} \\
+                Random Oversampling & \row{0.995 & 0.995 & 0.990 & 0.995}{1.000 & 0.987 & 1.000 & 1.000} \\
+                SMOTE & \row{0.998 & \textbf{1.000} & 0.995 & 0.998}{1.000 & 0.997 & 1.000 & 1.000} \\
+                Borderline SMOTE & \row{0.997 & \textbf{1.000} & 0.995 & 0.998}{1.000 & 0.995 & 1.000 & 1.000} \\
+                SVM SMOTE & \row{1.000 & 0.995 & \textbf{1.000} & 0.998}{1.000 & 0.995 & 1.000 & 1.000} \\
+                KMeans SMOTE & \row{N/A & N/A & N/A & N/A}{N/A & N/A & N/A & N/A} \\
+                ADASYN & \row{0.997 & 0.995 & 0.995 & 0.995}{1.000 & 0.995 & 1.000 & 1.000} \\
+                Random Undersampling & \row{0.995 & 0.819 & \textbf{1.000} & 0.995}{1.000 & 0.900 & 1.000 & 1.000} \\
+                CNN & \row{1.000 & 0.995 & \textbf{1.000} & 0.998}{1.000 & 0.997 & 1.000 & 1.000} \\
+                ENN & \row{\textbf{1.000} & \textbf{1.000} & \textbf{1.000} & \textbf{1.000}}{\textbf{1.000} & \textbf{1.000} & \textbf{1.000} & \textbf{1.000}} \\
+                Repeated ENN & \row{0.997 & \textbf{1.000} & 0.995 & 0.995}{1.000 & 0.995 & 1.000 & 1.000} \\
+                All KNN & \row{0.997 & \textbf{1.000} & 0.995 & 0.998}{1.000 & 0.992 & 1.000 & 1.000} \\
+                Near Miss & \row{0.999 & 0.980 & \textbf{1.000} & 0.995}{1.000 & 0.985 & 1.000 & 1.000} \\
+                Tomek Links & \row{0.995 & \textbf{1.000} & 0.990 & 0.995}{1.000 & 0.995 & 1.000 & 1.000} \\
+                One-Sided Selection & \row{0.992 & 0.990 & 0.985 & 0.990}{1.000 & 0.987 & 1.000 & 1.000} \\
+                NCL & \row{0.998 & 0.990 & \textbf{1.000} & 0.993}{1.000 & 0.990 & 1.000 & 1.000} \\
+                Cluster Centroids & \row{0.997 & 0.890 & \textbf{1.000} & 0.990}{1.000 & 0.941 & 1.000 & 1.000} \\
+                \bottomrule
+            \end{tabularx}
+        }
+    }
+    \caption{\textbf{Letter}}
+    \label{table:letter}
+\end{table}

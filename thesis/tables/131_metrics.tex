@@ -1,0 +1,34 @@
+\clearpage
+\begin{table}
+    \centering
+    \setlength\tabcolsep{2pt}
+    \widesplit{
+        \makebox[\textwidth]{
+            \begin{tabularx}{\textwidth}{lRRRR}
+                \toprule
+                & \row{B. Accuracy & Precision & Recall & F1 Max}{PR AUC & MCC & ROC AUC & P-ROC AUC} \\
+                \midrule
+                Baseline & \row{0.581 & 0.608 & 0.169 & \textbf{0.439}}{0.395 & 0.300 & \textbf{0.895} & 0.663} \\
+                Random Oversampling & \row{0.809 & 0.253 & 0.780 & 0.429}{0.359 & 0.380 & 0.878 & 0.878} \\
+                SMOTE & \row{0.802 & 0.259 & 0.759 & 0.426}{0.358 & 0.378 & 0.875 & 0.874} \\
+                Borderline SMOTE & \row{N/A & N/A & N/A & N/A}{N/A & N/A & N/A & N/A} \\
+                SVM SMOTE & \row{0.797 & 0.309 & 0.740 & 0.425}{0.352 & \textbf{0.399} & 0.874 & 0.874} \\
+                KMeans SMOTE & \row{N/A & N/A & N/A & N/A}{N/A & N/A & N/A & N/A} \\
+                ADASYN & \row{0.800 & 0.245 & 0.810 & 0.425}{0.348 & 0.369 & 0.873 & 0.871} \\
+                Random Undersampling & \row{\textbf{0.815} & 0.274 & 0.795 & 0.436}{0.383 & 0.399 & 0.894 & \textbf{0.894}} \\
+                CNN & \row{N/A & N/A & N/A & N/A}{N/A & N/A & N/A & N/A} \\
+                ENN & \row{0.786 & 0.590 & \textbf{0.818} & 0.437}{0.373 & 0.325 & 0.893 & 0.660} \\
+                Repeated ENN & \row{N/A & N/A & N/A & N/A}{N/A & N/A & N/A & N/A} \\
+                All KNN & \row{N/A & N/A & N/A & N/A}{N/A & N/A & N/A & N/A} \\
+                Near Miss & \row{0.672 & 0.107 & 0.763 & 0.192}{0.082 & 0.167 & 0.652 & 0.631} \\
+                Tomek Links & \row{0.579 & 0.620 & 0.165 & 0.437}{0.395 & 0.300 & 0.894 & 0.662} \\
+                One-Sided Selection & \row{0.579 & \textbf{0.621} & 0.164 & 0.437}{\textbf{0.395} & 0.300 & 0.893 & 0.662} \\
+                NCL & \row{0.603 & 0.542 & 0.218 & 0.435}{0.371 & 0.318 & 0.893 & 0.658} \\
+                Cluster Centroids & \row{N/A & N/A & N/A & N/A}{N/A & N/A & N/A & N/A} \\
+                \bottomrule
+            \end{tabularx}
+        }
+    }
+    \caption{\textbf{BNG - Sick}}
+    \label{table:bng-sick}
+\end{table}

@@ -1,0 +1,34 @@
+\clearpage
+\begin{table}
+    \centering
+    \setlength\tabcolsep{2pt}
+    \widesplit{
+        \makebox[\textwidth]{
+            \begin{tabularx}{\textwidth}{lRRRR}
+                \toprule
+                & \row{B. Accuracy & Precision & Recall & F1 Max}{PR AUC & MCC & ROC AUC & P-ROC AUC} \\
+                \midrule
+                Baseline & \row{0.507 & 0.455 & 0.014 & 0.193}{0.135 & 0.075 & \textbf{0.721} & 0.556} \\
+                Random Oversampling & \row{0.627 & 0.090 & 0.582 & 0.155}{0.105 & 0.116 & 0.684 & 0.684} \\
+                SMOTE & \row{0.595 & 0.091 & 0.473 & 0.144}{0.078 & 0.095 & 0.638 & 0.635} \\
+                Borderline SMOTE & \row{0.601 & 0.102 & 0.432 & 0.147}{0.087 & 0.099 & 0.653 & 0.651} \\
+                SVM SMOTE & \row{0.598 & 0.102 & 0.375 & 0.148}{0.094 & 0.104 & 0.657 & 0.656} \\
+                KMeans SMOTE & \row{N/A & N/A & N/A & N/A}{N/A & N/A & N/A & N/A} \\
+                ADASYN & \row{0.598 & 0.090 & 0.549 & 0.143}{0.077 & 0.096 & 0.634 & 0.634} \\
+                Random Undersampling & \row{\textbf{0.653} & 0.097 & 0.653 & 0.187}{0.132 & \textbf{0.141} & 0.716 & \textbf{0.716}} \\
+                CNN & \row{N/A & N/A & N/A & N/A}{N/A & N/A & N/A & N/A} \\
+                ENN & \row{0.543 & \textbf{0.539} & 0.100 & 0.191}{0.140 & 0.134 & 0.718 & 0.565} \\
+                Repeated ENN & \row{0.608 & 0.449 & 0.342 & 0.193}{0.136 & 0.131 & 0.720 & 0.564} \\
+                All KNN & \row{0.536 & 0.445 & 0.081 & \textbf{0.195}}{\textbf{0.140} & 0.133 & 0.719 & 0.562} \\
+                Near Miss & \row{0.514 & 0.046 & \textbf{0.924} & 0.092}{0.049 & 0.012 & 0.531 & 0.523} \\
+                Tomek Links & \row{0.509 & 0.462 & 0.019 & 0.191}{0.135 & 0.087 & 0.720 & 0.557} \\
+                One-Sided Selection & \row{0.510 & 0.496 & 0.020 & 0.193}{0.136 & 0.093 & 0.720 & 0.557} \\
+                NCL & \row{0.538 & 0.359 & 0.089 & 0.192}{0.138 & 0.129 & 0.718 & 0.564} \\
+                Cluster Centroids & \row{N/A & N/A & N/A & N/A}{N/A & N/A & N/A & N/A} \\
+                \bottomrule
+            \end{tabularx}
+        }
+    }
+    \caption{\textbf{Click Prediction V1}}
+    \label{table:click-prediction-v1}
+\end{table}

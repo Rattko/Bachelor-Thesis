@@ -1,0 +1,34 @@
+\clearpage
+\begin{table}
+    \centering
+    \setlength\tabcolsep{2pt}
+    \widesplit{
+        \makebox[\textwidth]{
+            \begin{tabularx}{\textwidth}{lRRRR}
+                \toprule
+                & \row{B. Accuracy & Precision & Recall & F1 Max}{PR AUC & MCC & ROC AUC & P-ROC AUC} \\
+                \midrule
+                Baseline & \row{0.773 & 0.795 & 0.608 & 0.776}{0.834 & 0.598 & 0.903 & 0.868} \\
+                Random Oversampling & \row{0.828 & 0.814 & 0.725 & 0.796}{0.840 & 0.678 & 0.907 & 0.907} \\
+                SMOTE & \row{0.842 & 0.795 & 0.784 & 0.796}{0.861 & 0.681 & 0.920 & 0.914} \\
+                Borderline SMOTE & \row{0.822 & 0.818 & 0.706 & 0.800}{0.846 & 0.676 & 0.908 & 0.904} \\
+                SVM SMOTE & \row{0.848 & 0.814 & 0.804 & \textbf{0.816}}{0.863 & 0.681 & 0.915 & 0.915} \\
+                KMeans SMOTE & \row{0.828 & 0.804 & 0.725 & 0.804}{0.852 & 0.678 & \textbf{0.925} & \textbf{0.920}} \\
+                ADASYN & \row{\textbf{0.858} & 0.810 & 0.824 & 0.800}{0.860 & \textbf{0.697} & 0.922 & 0.917} \\
+                Random Undersampling & \row{0.846 & 0.776 & 0.784 & 0.777}{0.842 & 0.688 & 0.905 & 0.905} \\
+                CNN & \row{0.795 & 0.522 & \textbf{0.922} & 0.771}{0.826 & 0.532 & 0.903 & 0.901} \\
+                ENN & \row{0.839 & 0.805 & 0.882 & 0.800}{0.837 & 0.645 & 0.909 & 0.894} \\
+                Repeated ENN & \row{0.847 & 0.821 & 0.882 & 0.778}{0.833 & 0.648 & 0.903 & 0.882} \\
+                All KNN & \row{0.827 & 0.795 & 0.843 & 0.750}{0.834 & 0.647 & 0.903 & 0.872} \\
+                Near Miss & \row{0.811 & 0.762 & 0.843 & 0.740}{0.809 & 0.618 & 0.890 & 0.890} \\
+                Tomek Links & \row{0.797 & 0.825 & 0.647 & 0.757}{0.840 & 0.643 & 0.906 & 0.873} \\
+                One-Sided Selection & \row{0.793 & 0.805 & 0.647 & 0.757}{0.832 & 0.629 & 0.898 & 0.867} \\
+                NCL & \row{0.843 & 0.800 & 0.843 & 0.780}{0.839 & 0.655 & 0.904 & 0.881} \\
+                Cluster Centroids & \row{0.834 & \textbf{0.903} & 0.784 & 0.792}{\textbf{0.868} & 0.669 & \textbf{0.925} & 0.920} \\
+                \bottomrule
+            \end{tabularx}
+        }
+    }
+    \caption{\textbf{Graph - Raw}}
+    \label{table:graph-raw}
+\end{table}

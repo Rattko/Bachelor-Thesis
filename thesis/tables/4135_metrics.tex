@@ -1,0 +1,34 @@
+\clearpage
+\begin{table}
+    \centering
+    \setlength\tabcolsep{2pt}
+    \widesplit{
+        \makebox[\textwidth]{
+            \begin{tabularx}{\textwidth}{lRRRR}
+                \toprule
+                & \row{B. Accuracy & Precision & Recall & F1 Max}{PR AUC & MCC & ROC AUC & P-ROC AUC} \\
+                \midrule
+                Baseline & \row{0.675 & 0.660 & 0.361 & 0.514}{0.490 & 0.466 & 0.861 & 0.725} \\
+                Random Oversampling & \row{0.702 & 0.578 & 0.424 & 0.517}{0.478 & 0.468 & 0.863 & \textbf{0.860}} \\
+                SMOTE & \row{0.671 & 0.580 & 0.359 & 0.476}{0.425 & 0.431 & 0.838 & 0.835} \\
+                Borderline SMOTE & \row{0.668 & 0.572 & 0.352 & 0.473}{0.433 & 0.423 & 0.836 & 0.833} \\
+                SVM SMOTE & \row{0.671 & 0.603 & 0.359 & 0.475}{0.447 & 0.433 & 0.837 & 0.832} \\
+                KMeans SMOTE & \row{N/A & N/A & N/A & N/A}{N/A & N/A & N/A & N/A} \\
+                ADASYN & \row{0.674 & 0.585 & 0.363 & 0.471}{0.420 & 0.436 & 0.834 & 0.831} \\
+                Random Undersampling & \row{\textbf{0.767} & 0.213 & 0.753 & 0.444}{0.398 & 0.319 & 0.823 & 0.819} \\
+                CNN & \row{0.766 & 0.366 & 0.643 & 0.475}{0.452 & 0.412 & 0.838 & 0.819} \\
+                ENN & \row{0.724 & 0.734 & 0.470 & 0.519}{\textbf{0.496} & 0.482 & 0.863 & 0.753} \\
+                Repeated ENN & \row{0.714 & \textbf{0.905} & 0.665 & 0.510}{0.471 & 0.400 & 0.858 & 0.716} \\
+                All KNN & \row{0.724 & 0.641 & 0.572 & 0.521}{0.491 & \textbf{0.485} & 0.861 & 0.743} \\
+                Near Miss & \row{0.672 & 0.103 & 0.939 & 0.299}{0.226 & 0.163 & 0.740 & 0.740} \\
+                Tomek Links & \row{0.581 & 0.765 & 0.165 & 0.517}{0.478 & 0.340 & 0.861 & 0.725} \\
+                One-Sided Selection & \row{0.688 & 0.650 & 0.388 & 0.519}{0.486 & 0.480 & 0.861 & 0.728} \\
+                NCL & \row{0.724 & 0.601 & 0.470 & \textbf{0.531}}{0.483 & 0.485 & \textbf{0.864} & 0.751} \\
+                Cluster Centroids & \row{0.749 & 0.167 & \textbf{0.994} & 0.436}{0.357 & 0.268 & 0.828 & 0.821} \\
+                \bottomrule
+            \end{tabularx}
+        }
+    }
+    \caption{\textbf{Amazon Employee}}
+    \label{table:amazon-employee}
+\end{table}

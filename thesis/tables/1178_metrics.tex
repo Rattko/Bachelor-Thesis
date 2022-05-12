@@ -1,0 +1,34 @@
+\clearpage
+\begin{table}
+    \centering
+    \setlength\tabcolsep{2pt}
+    \widesplit{
+        \makebox[\textwidth]{
+            \begin{tabularx}{\textwidth}{lRRRR}
+                \toprule
+                & \row{B. Accuracy & Precision & Recall & F1 Max}{PR AUC & MCC & ROC AUC & P-ROC AUC} \\
+                \midrule
+                Baseline & \row{0.773 & \textbf{0.778} & 0.549 & 0.662}{0.717 & 0.647 & 0.976 & 0.833} \\
+                Random Oversampling & \row{0.883 & 0.275 & 0.818 & 0.604}{0.561 & 0.456 & 0.895 & 0.895} \\
+                SMOTE & \row{0.844 & 0.479 & 0.715 & 0.591}{0.634 & 0.567 & 0.966 & 0.965} \\
+                Borderline SMOTE & \row{N/A & N/A & N/A & N/A}{N/A & N/A & N/A & N/A} \\
+                SVM SMOTE & \row{0.840 & 0.541 & 0.701 & 0.602}{0.623 & 0.592 & 0.971 & 0.971} \\
+                KMeans SMOTE & \row{N/A & N/A & N/A & N/A}{N/A & N/A & N/A & N/A} \\
+                ADASYN & \row{0.842 & 0.417 & 0.718 & 0.579}{0.618 & 0.527 & 0.963 & 0.961} \\
+                Random Undersampling & \row{\textbf{0.927} & 0.240 & 0.930 & \textbf{0.677}}{\textbf{0.738} & 0.449 & \textbf{0.979} & \textbf{0.979}} \\
+                CNN & \row{N/A & N/A & N/A & N/A}{N/A & N/A & N/A & N/A} \\
+                ENN & \row{0.874 & 0.759 & 0.786 & 0.665}{0.714 & \textbf{0.649} & 0.976 & 0.833} \\
+                Repeated ENN & \row{N/A & N/A & N/A & N/A}{N/A & N/A & N/A & N/A} \\
+                All KNN & \row{N/A & N/A & N/A & N/A}{N/A & N/A & N/A & N/A} \\
+                Near Miss & \row{0.812 & 0.107 & \textbf{0.949} & 0.327}{0.251 & 0.251 & 0.906 & 0.900} \\
+                Tomek Links & \row{0.772 & 0.771 & 0.547 & 0.665}{0.719 & 0.643 & 0.976 & 0.833} \\
+                One-Sided Selection & \row{0.773 & 0.773 & 0.549 & 0.665}{0.720 & 0.645 & 0.976 & 0.834} \\
+                NCL & \row{N/A & N/A & N/A & N/A}{N/A & N/A & N/A & N/A} \\
+                Cluster Centroids & \row{0.879 & 0.182 & 0.938 & 0.587}{0.592 & 0.358 & 0.950 & 0.950} \\
+                \bottomrule
+            \end{tabularx}
+        }
+    }
+    \caption{\textbf{BNG - Solar Flare}}
+    \label{table:bng-solar-flare}
+\end{table}

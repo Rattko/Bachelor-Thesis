@@ -1,0 +1,34 @@
+\clearpage
+\begin{table}
+    \centering
+    \setlength\tabcolsep{2pt}
+    \widesplit{
+        \makebox[\textwidth]{
+            \begin{tabularx}{\textwidth}{lRRRR}
+                \toprule
+                & \row{B. Accuracy & Precision & Recall & F1 Max}{PR AUC & MCC & ROC AUC & P-ROC AUC} \\
+                \midrule
+                Baseline & \row{0.500 & 0.000 & 0.000 & 0.167}{0.050 & 0.000 & 0.773 & 0.509} \\
+                Random Oversampling & \row{0.491 & 0.000 & 0.000 & 0.071}{0.023 & -0.009 & 0.877 & 0.869} \\
+                SMOTE & \row{0.652 & 0.047 & 0.333 & 0.167}{0.037 & 0.115 & 0.730 & 0.712} \\
+                Borderline SMOTE & \row{0.580 & 0.111 & 0.167 & \textbf{0.286}}{0.097 & 0.132 & \textbf{0.933} & \textbf{0.929}} \\
+                SVM SMOTE & \row{0.582 & \textbf{0.200} & 0.167 & 0.267}{0.085 & \textbf{0.179} & 0.918 & 0.908} \\
+                KMeans SMOTE & \row{N/A & N/A & N/A & N/A}{N/A & N/A & N/A & N/A} \\
+                ADASYN & \row{0.498 & 0.000 & 0.000 & 0.167}{0.033 & -0.004 & 0.705 & 0.714} \\
+                Random Undersampling & \row{\textbf{0.802} & 0.024 & 0.833 & 0.143}{0.036 & 0.109 & 0.854 & 0.847} \\
+                CNN & \row{0.560 & 0.006 & 0.500 & 0.048}{0.007 & 0.016 & 0.555 & 0.513} \\
+                ENN & \row{0.500 & 0.000 & 0.000 & 0.133}{0.052 & 0.000 & 0.914 & 0.499} \\
+                Repeated ENN & \row{0.500 & 0.000 & 0.000 & 0.133}{0.052 & 0.000 & 0.914 & 0.499} \\
+                All KNN & \row{0.500 & 0.000 & 0.000 & 0.148}{0.051 & 0.000 & 0.924 & 0.499} \\
+                Near Miss & \row{0.602 & 0.011 & \textbf{1.000} & 0.286}{\textbf{0.203} & 0.039 & 0.740 & 0.740} \\
+                Tomek Links & \row{0.500 & 0.000 & 0.000 & 0.182}{0.056 & 0.000 & 0.772 & 0.524} \\
+                One-Sided Selection & \row{0.500 & 0.000 & 0.000 & 0.143}{0.051 & 0.000 & 0.853 & 0.499} \\
+                NCL & \row{0.500 & 0.000 & 0.000 & 0.222}{0.063 & 0.000 & 0.850 & 0.499} \\
+                Cluster Centroids & \row{0.712 & 0.009 & \textbf{1.000} & 0.250}{0.090 & 0.056 & 0.777 & 0.787} \\
+                \bottomrule
+            \end{tabularx}
+        }
+    }
+    \caption{\textbf{PC2}}
+    \label{table:pc2}
+\end{table}

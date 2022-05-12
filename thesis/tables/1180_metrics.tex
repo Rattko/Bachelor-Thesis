@@ -1,0 +1,34 @@
+\clearpage
+\begin{table}
+    \centering
+    \setlength\tabcolsep{2pt}
+    \widesplit{
+        \makebox[\textwidth]{
+            \begin{tabularx}{\textwidth}{lRRRR}
+                \toprule
+                & \row{B. Accuracy & Precision & Recall & F1 Max}{PR AUC & MCC & ROC AUC & P-ROC AUC} \\
+                \midrule
+                Baseline & \row{0.595 & 0.731 & 0.196 & 0.506}{0.491 & 0.354 & 0.894 & 0.709} \\
+                Random Oversampling & \row{0.803 & 0.306 & 0.798 & 0.477}{0.396 & 0.413 & 0.845 & 0.678} \\
+                SMOTE & \row{0.791 & 0.357 & 0.718 & 0.479}{0.424 & 0.429 & 0.851 & \textbf{0.850}} \\
+                Borderline SMOTE & \row{0.762 & 0.375 & 0.652 & 0.463}{0.384 & 0.410 & 0.849 & 0.663} \\
+                SVM SMOTE & \row{N/A & N/A & N/A & N/A}{N/A & N/A & N/A & N/A} \\
+                KMeans SMOTE & \row{N/A & N/A & N/A & N/A}{N/A & N/A & N/A & N/A} \\
+                ADASYN & \row{0.790 & 0.347 & 0.738 & 0.475}{0.407 & 0.422 & 0.849 & 0.679} \\
+                Random Undersampling & \row{\textbf{0.826} & 0.333 & \textbf{0.840} & 0.505}{\textbf{0.495} & \textbf{0.450} & \textbf{0.895} & 0.709} \\
+                CNN & \row{N/A & N/A & N/A & N/A}{N/A & N/A & N/A & N/A} \\
+                ENN & \row{0.811 & 0.580 & 0.774 & 0.506}{0.459 & 0.441 & 0.893 & 0.701} \\
+                Repeated ENN & \row{N/A & N/A & N/A & N/A}{N/A & N/A & N/A & N/A} \\
+                All KNN & \row{N/A & N/A & N/A & N/A}{N/A & N/A & N/A & N/A} \\
+                Near Miss & \row{0.751 & 0.254 & 0.802 & 0.416}{0.294 & 0.332 & 0.839 & 0.833} \\
+                Tomek Links & \row{0.594 & 0.733 & 0.195 & \textbf{0.507}}{0.492 & 0.354 & 0.894 & 0.709} \\
+                One-Sided Selection & \row{0.594 & \textbf{0.734} & 0.195 & 0.506}{0.492 & 0.353 & 0.894 & 0.709} \\
+                NCL & \row{0.686 & 0.514 & 0.414 & 0.506}{0.489 & 0.394 & 0.893 & 0.721} \\
+                Cluster Centroids & \row{N/A & N/A & N/A & N/A}{N/A & N/A & N/A & N/A} \\
+                \bottomrule
+            \end{tabularx}
+        }
+    }
+    \caption{\textbf{BNG - Spect}}
+    \label{table:bng-spect}
+\end{table}

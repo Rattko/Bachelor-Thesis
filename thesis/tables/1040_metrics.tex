@@ -1,0 +1,34 @@
+\clearpage
+\begin{table}
+    \centering
+    \setlength\tabcolsep{2pt}
+    \widesplit{
+        \makebox[\textwidth]{
+            \begin{tabularx}{\textwidth}{lRRRR}
+                \toprule
+                & \row{B. Accuracy & Precision & Recall & F1 Max}{PR AUC & MCC & ROC AUC & P-ROC AUC} \\
+                \midrule
+                Baseline & \row{0.994 & 0.944 & 0.991 & 0.971}{0.987 & \textbf{0.965} & 0.999 & 0.995} \\
+                Random Oversampling & \row{0.987 & 0.943 & 0.977 & 0.969}{0.980 & 0.958 & 0.999 & 0.999} \\
+                SMOTE & \row{0.989 & 0.940 & 0.982 & 0.969}{0.984 & 0.958 & 0.999 & 0.999} \\
+                Borderline SMOTE & \row{\textbf{0.997} & 0.948 & \textbf{1.000} & \textbf{0.973}}{0.987 & 0.962 & 0.999 & 0.999} \\
+                SVM SMOTE & \row{0.997 & 0.936 & \textbf{1.000} & 0.971}{0.986 & 0.961 & 0.999 & 0.999} \\
+                KMeans SMOTE & \row{0.991 & \textbf{0.956} & 0.986 & 0.967}{0.982 & 0.965 & 0.999 & 0.999} \\
+                ADASYN & \row{0.991 & 0.952 & 0.986 & 0.967}{0.980 & 0.960 & 0.999 & 0.999} \\
+                Random Undersampling & \row{0.992 & 0.857 & \textbf{1.000} & 0.961}{0.981 & 0.918 & 0.999 & 0.999} \\
+                CNN & \row{N/A & N/A & N/A & N/A}{N/A & N/A & N/A & N/A} \\
+                ENN & \row{0.997 & 0.932 & \textbf{1.000} & 0.963}{0.976 & 0.961 & 0.999 & 0.994} \\
+                Repeated ENN & \row{0.995 & 0.932 & 0.995 & 0.965}{0.977 & 0.961 & 0.999 & 0.992} \\
+                All KNN & \row{0.995 & 0.925 & 0.995 & 0.961}{0.972 & 0.957 & 0.999 & 0.993} \\
+                Near Miss & \row{0.997 & 0.921 & \textbf{1.000} & 0.971}{0.988 & 0.957 & \textbf{0.999} & \textbf{0.999}} \\
+                Tomek Links & \row{0.994 & 0.909 & 0.995 & 0.961}{0.978 & 0.948 & 0.999 & 0.993} \\
+                One-Sided Selection & \row{0.989 & 0.944 & 0.982 & 0.968}{\textbf{0.988} & 0.960 & 0.999 & 0.995} \\
+                NCL & \row{0.994 & 0.916 & 0.995 & 0.960}{0.976 & 0.947 & 0.999 & 0.993} \\
+                Cluster Centroids & \row{0.996 & 0.899 & \textbf{1.000} & 0.961}{0.979 & 0.945 & 0.999 & 0.999} \\
+                \bottomrule
+            \end{tabularx}
+        }
+    }
+    \caption{\textbf{Sylva Prior}}
+    \label{table:sylva-prior}
+\end{table}

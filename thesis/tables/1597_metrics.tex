@@ -1,0 +1,34 @@
+\clearpage
+\begin{table}
+    \centering
+    \setlength\tabcolsep{2pt}
+    \widesplit{
+        \makebox[\textwidth]{
+            \begin{tabularx}{\textwidth}{lRRRR}
+                \toprule
+                & \row{B. Accuracy & Precision & Recall & F1 Max}{PR AUC & MCC & ROC AUC & P-ROC AUC} \\
+                \midrule
+                Baseline & \row{0.942 & 0.055 & 0.911 & 0.276}{0.149 & 0.221 & 0.982 & 0.549} \\
+                Random Oversampling & \row{0.939 & \textbf{0.923} & 0.878 & \textbf{0.908}}{0.893 & \textbf{0.900} & 0.989 & 0.989} \\
+                SMOTE & \row{0.947 & 0.827 & 0.894 & 0.902}{0.897 & 0.860 & \textbf{0.990} & \textbf{0.990}} \\
+                Borderline SMOTE & \row{0.951 & 0.879 & 0.902 & 0.893}{0.896 & 0.882 & 0.986 & 0.986} \\
+                SVM SMOTE & \row{0.951 & 0.894 & 0.902 & \textbf{0.908}}{\textbf{0.907} & 0.894 & 0.988 & 0.988} \\
+                KMeans SMOTE & \row{N/A & N/A & N/A & N/A}{N/A & N/A & N/A & N/A} \\
+                ADASYN & \row{0.951 & 0.822 & 0.902 & 0.893}{0.889 & 0.861 & 0.990 & 0.990} \\
+                Random Undersampling & \row{0.951 & 0.147 & 0.919 & 0.873}{0.792 & 0.363 & 0.987 & 0.986} \\
+                CNN & \row{0.914 & 0.043 & 0.862 & 0.651}{0.651 & 0.189 & 0.965 & 0.964} \\
+                ENN & \row{0.942 & 0.884 & 0.911 & 0.882}{0.868 & 0.877 & 0.988 & 0.940} \\
+                Repeated ENN & \row{0.942 & 0.870 & 0.911 & 0.876}{0.875 & 0.870 & 0.988 & 0.940} \\
+                All KNN & \row{0.942 & 0.903 & 0.911 & 0.889}{0.850 & 0.865 & 0.982 & 0.932} \\
+                Near Miss & \row{0.922 & 0.026 & \textbf{0.992} & 0.863}{0.844 & 0.145 & 0.969 & 0.967} \\
+                Tomek Links & \row{0.942 & 0.055 & 0.911 & 0.276}{0.149 & 0.221 & 0.982 & 0.549} \\
+                One-Sided Selection & \row{0.942 & 0.055 & 0.911 & 0.276}{0.149 & 0.221 & 0.982 & 0.549} \\
+                NCL & \row{0.942 & 0.902 & 0.911 & 0.884}{0.849 & 0.867 & 0.982 & 0.932} \\
+                Cluster Centroids & \row{\textbf{0.953} & 0.052 & 0.984 & 0.861}{0.835 & 0.216 & 0.987 & 0.986} \\
+                \bottomrule
+            \end{tabularx}
+        }
+    }
+    \caption{\textbf{Credit Card}}
+    \label{table:credit-card}
+\end{table}

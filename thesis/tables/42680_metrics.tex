@@ -1,0 +1,34 @@
+\clearpage
+\begin{table}
+    \centering
+    \setlength\tabcolsep{2pt}
+    \widesplit{
+        \makebox[\textwidth]{
+            \begin{tabularx}{\textwidth}{lRRRR}
+                \toprule
+                & \row{B. Accuracy & Precision & Recall & F1 Max}{PR AUC & MCC & ROC AUC & P-ROC AUC} \\
+                \midrule
+                Baseline & \row{0.998 & 0.994 & 0.996 & 0.996}{1.000 & 0.994 & 1.000 & 1.000} \\
+                Random Oversampling & \row{0.999 & 0.988 & 0.998 & 0.995}{1.000 & 0.992 & 1.000 & 1.000} \\
+                SMOTE & \row{0.998 & 0.989 & 0.997 & \textbf{0.997}}{1.000 & 0.992 & 1.000 & 1.000} \\
+                Borderline SMOTE & \row{0.997 & 0.990 & 0.994 & 0.994}{1.000 & 0.991 & 1.000 & 1.000} \\
+                SVM SMOTE & \row{\textbf{0.999} & 0.991 & 0.999 & \textbf{0.997}}{\textbf{1.000} & 0.994 & \textbf{1.000} & \textbf{1.000}} \\
+                KMeans SMOTE & \row{N/A & N/A & N/A & N/A}{N/A & N/A & N/A & N/A} \\
+                ADASYN & \row{0.998 & 0.991 & 0.997 & 0.995}{1.000 & 0.994 & 1.000 & 1.000} \\
+                Random Undersampling & \row{0.998 & 0.926 & \textbf{1.000} & 0.978}{0.995 & 0.960 & 1.000 & 1.000} \\
+                CNN & \row{N/A & N/A & N/A & N/A}{N/A & N/A & N/A & N/A} \\
+                ENN & \row{0.998 & 0.986 & 0.997 & 0.993}{0.999 & 0.991 & 1.000 & 1.000} \\
+                Repeated ENN & \row{N/A & N/A & N/A & N/A}{N/A & N/A & N/A & N/A} \\
+                All KNN & \row{N/A & N/A & N/A & N/A}{N/A & N/A & N/A & N/A} \\
+                Near Miss & \row{0.984 & 0.585 & \textbf{1.000} & 0.987}{0.997 & 0.753 & 1.000 & 1.000} \\
+                Tomek Links & \row{0.998 & \textbf{0.995} & 0.996 & 0.996}{1.000 & \textbf{0.996} & 1.000 & 1.000} \\
+                One-Sided Selection & \row{0.996 & 0.991 & 0.993 & 0.992}{0.999 & 0.991 & 1.000 & 1.000} \\
+                NCL & \row{N/A & N/A & N/A & N/A}{N/A & N/A & N/A & N/A} \\
+                Cluster Centroids & \row{0.999 & 0.989 & \textbf{1.000} & 0.996}{1.000 & 0.993 & 1.000 & 1.000} \\
+                \bottomrule
+            \end{tabularx}
+        }
+    }
+    \caption{\textbf{Relevant Images}}
+    \label{table:relevant-images}
+\end{table}
