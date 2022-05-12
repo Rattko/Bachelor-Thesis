@@ -1,1 +1,38 @@
 \chapterwithtoc{Conclusion}
+
+At the beginning of this thesis, we set out to create a robust benchmark covering by far the most
+imbalanced preprocessing methods. The benchmark aimed to compare various data-level imbalanced
+preprocessing methods systematically. We implemented a framework allowing us to experiment with
+preprocessing methods effortlessly. The discussion about the implementation of the framework took
+place in Chapter~\ref{chapter:benchmark}.
+
+We successfully ran a large-scale experiment covering sixteen preprocessing methods over eighteen
+datasets and reported scores in eight evaluation metrics, provided in
+Appendix~\ref{appendix:scores}. The experiment gave us a substantial amount of data to analyse. We
+presented and commented on the results in Chapter~\ref{chapter:results}. The results show a
+considerable difference in performance between oversampling and undersampling methods.
+Oversampling methods consistently achieved better performance than \emph{most} of the undersampling
+methods. Notably, Random Undersampling and Cluster Centroids achieved performance comparable to
+that of oversampling methods. Condensed Nearest Neighbours, Edited Nearest Neighbours and Near Miss
+performed a bit worse but still outperformed our baseline - no preprocessing at all. The remaining
+undersampling methods, on average, achieved the same performance as our baseline.
+
+Another area in which we compared the preprocessing methods was the time needed to resample a
+dataset. Even though the differences were not significant, the oversampling methods were a bit
+faster than the undersampling methods. Understandably, Random Oversampling and Undersampling
+achieved the best preprocessing times as they do not perform any heavy computations. Apart from
+these two methods and KMeans SMOTE, which finished successfully only on four out of eighteen
+datasets and two of them contained only a couple hundred samples, the SMOTE algorithm was the
+fastest preprocessing method, followed by Borderline SMOTE, ADASYN and Near Miss. On the contrary,
+the slowest preprocessing methods were SVM SMOTE and Condensed Nearest Neighbour, which is
+understandable given the complexity of the methods. These results provide concrete evidence and
+reasons why the SMOTE preprocessing method is one of the most widely used preprocessing methods in
+practical applications.
+
+Although the results are favourable for oversampling methods, there still are preprocessing methods
+that we did not include in our benchmark. We have not been able to experiment with combinations of
+oversampling and undersampling methods, namely SMOTEENN and SMOTETomek. We plan to extend our
+benchmark to include these methods. Additionally, we could experiment only with smaller datasets
+due to time constraints. Another room for improvement includes running experiments on datasets
+which contain huge imbalances of 1:5000 and beyond. These improvements can be achieved using cyber
+security datasets that inherently contain enormous imbalances.
