@@ -1,2 +1,103 @@
-\chapter{Results}
+\chapter{Experimental Results}
 \label{chapter:results}
+
+This chapter summarises the results of our experiment assessing sixteen resampling methods over
+eighteen datasets. Sixteen of these datasets are publicly available on OpenML~\cite{openml}. The
+remaining two datasets, namely \emph{Graph - Embedding} and \emph{Graph - Raw}, are proprietary
+cyber security datasets. We can see the datasets' names, sizes and imbalances in
+Table~\ref{table:datasets}.
+
+\input{tables/datasets}
+
+Besides sixteen resampling methods, we also include a no-op preprocessing method to obtain baseline
+results on the original datasets without performing any preprocessing. The resampling methods and
+the number of possible configurations of the hyperparameters we search through are summarised in
+Table~\ref{table:configs}.
+
+\input{tables/configurations}
+
+We report the results using eight evaluation metrics. Concretely, Balanced Accuracy, Precision,
+Recall and Matthews Correlation Coefficient with the default decision threshold set to 0.5; F1 Max
+with a decision threshold maximising the score on the testing set; Area Under the Precision-Recall
+(PR) and Receiver Operating Characteristics (ROC) curves and lastly area under the partial ROC
+curve with FPR values on the horizontal axis ranging from 0 to the imbalance ratio of the
+corresponding dataset.
+
+Eighteen separate tables are included for each dataset providing detailed metrics for each
+preprocessing method in Appendix~\ref{appendix:scores}. Maximal values of each metric are
+highlighted in bold font. Some of the tables contain unsuccessful runs labelled \emph{N/A}. The
+most common reason for failure was a substantial amount of time needed to resample the dataset and
+insufficient time to train a classifier on large datasets.
+
+We include a table containing average ranks for each combination of preprocessing method and
+evaluation metric computed across all datasets~\ref{table:mean-rank}. Ranks are computed as
+follows: the highest score is assigned a rank of 1, the second-highest a rank of 2 and so on.
+Average ranks are assigned in case of ties. Some of the preprocessing methods did not finish
+successfully on specific datasets; thus, the second number in each cell represents the number of
+datasets across which the average rank was computed. However, many of the preprocessing methods
+still finished successfully on all datasets with one exception. We can see that the KMeans SMOTE
+preprocessing method successfully finished only on four datasets due to exceptions interrupting the
+resampling process.
+
+The table also shows that oversampling methods were ranked better on average than undersampling
+methods when considering the P-ROC metric. We include a violin plot in
+Figure~\ref{figure:p-roc-ranks} showing the distribution of ranks for each resampling method when
+evaluated using the P-ROC score to explore this hypothesis more. We also include the same plot for
+all other evaluation metrics in Appendix~\ref{appendix:distributions}. It is even more clear from
+the figure that, indeed, the oversampling methods (methods from Random Oversampling to ADASYN)
+achieved better ranks than undersampling methods. However, there are some exceptions within the
+group of undersampling methods. Random Undersampling and Cluster Centroids consistently achieved
+ranks comparable to those of oversampling methods. Condensed Nearest Neighbour, Edited Nearest
+Neighbours and NearMiss did not reach the scores of oversampling methods but outperformed the
+baseline method, i.e. no preprocessing at all. The remaining undersampling methods achieved
+approximately the same performance as the baseline.
+
+We also performed the Friedman test which is a non-parametric equivalent of repeated-measures
+ANOVA~\cite{stats-comparison}. The Friedman test assigns ranks to each method in the same way we
+discussed above and it compares average ranks of the methods. The null hypothesis states that all
+algorithms participating in the test are equivalent and thus have the same average rank. We
+rejected the null hypothesis at 0.001 significance level under all eight evaluation metrics,
+supporting our previous claim that some preprocessing methods achieved better ranks than others.
+
+Furthermore, we include a violin plot showing the distribution of preprocessing times of each
+resampling method together with the mean value, 25th, 50th and 75th percentile in
+Figure~\ref{figure:preprocessing-times}. Even in this case, oversampling methods achieved slightly
+better times than undersampling methods. Understandably, Random Oversampling and Undersampling took
+the least amount of time as they do not perform any heavy computations. KMeans SMOTE seems to be
+faster than any of the remaining preprocessing methods. However, we need to keep in mind that
+KMeans SMOTE finished successfully only on four datasets, out of which two contained only a couple
+hundred samples. Forgetting about these preprocessing methods gives way to the SMOTE. It is evident
+from the results why SMOTE is considered the most widely used resampling method. It achieved one of
+the best ranks and performed resampling much faster than other preprocessing methods.
+
+We see that an excellent distribution of ranks of Cluster Centroids may be negated by the amount of
+time it needs to resample the datasets putting it in line with other undersampling methods. Lastly,
+two resampling methods stand out from the crowd negatively. SVM SMOTE and Condensed Nearest
+Neighbour methods were the slowest methods in our experiments, peaking with a maximum resampling
+time of over a day.
+
+\input{tables/mean_rank}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{figures/partial_roc_auc_ranks_distribution.pdf}
+    \caption{
+        \textbf{Distribution of Ranks for Partial ROC AUC Evaluation Metric.} The figure shows the
+        distribution of ranks computed across all datasets in the experiments. Ranks were computed
+        from Partial ROC AUC scores for each preprocessing method separately. Red marks denote each
+        method’s mean rank, and three yellow marks indicate the 25th, 50th and 75th percentiles.
+    }
+    \label{figure:p-roc-ranks}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{figures/preprocessing_times.pdf}
+    \caption{
+        \textbf{Distribution of Preprocessing Times Across All Datasets.} The figure shows the
+        distribution of preprocessing times, in seconds, computed across all datasets in the
+        experiment. Red marks denote each method's mean preprocessing time, and three yellow marks
+        indicate the 25th, 50th and 75th percentiles.
+    }
+    \label{figure:preprocessing-times}
+\end{figure}
