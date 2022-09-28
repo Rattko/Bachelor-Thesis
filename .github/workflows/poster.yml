@@ -21,12 +21,12 @@ jobs:
       - name: Get Picins Library
         uses: wei/curl@v1
         with:
-          args: -L -O http://mirrors.ctan.org/macros/latex209/contrib/picins/picins.sty
+          args: --location --output poster/picins.sty http://mirrors.ctan.org/macros/latex209/contrib/picins/picins.sty
 
       - name: Get BaPoster Library
         uses: wei/curl@v1
         with:
-          args: -O https://raw.githubusercontent.com/anriseth/baposter/master/baposter.cls
+          args: --output poster/baposter.cls https://raw.githubusercontent.com/anriseth/baposter/master/baposter.cls
 
       - name: Build Poster
         run: make
