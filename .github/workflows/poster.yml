@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'poster/**'
+      - '.github/workflows/poster.yml'
   workflow_dispatch:
 
 jobs:
