@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-thesis:
     runs-on: ubuntu-latest
     container: { image: 'aergus/latex' }
     defaults:
@@ -15,14 +15,14 @@ jobs:
         working-directory: thesis
 
     steps:
-      - name: Checkout
+      - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Build the thesis
-        run: latexmk -pdf thesis
+      - name: Build Thesis
+        run: make
 
       - name: Upload PDF
         uses: actions/upload-artifact@v3
         with:
-          name: Bachelor Thesis
+          name: Thesis
           path: thesis/thesis.pdf

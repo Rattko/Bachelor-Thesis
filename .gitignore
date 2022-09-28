@@ -1,4 +1,5 @@
 .mlruns.db
+matplotlibrc
 
 .venv/
 .mypy_cache/
