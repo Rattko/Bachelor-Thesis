@@ -1,0 +1,38 @@
+name: Build LaTex Poster
+
+on:
+  push:
+    paths:
+      - 'poster/**'
+  workflow_dispatch:
+
+jobs:
+  build-poster:
+    runs-on: ubuntu-latest
+    container: { image: 'aergus/latex' }
+    defaults:
+      run:
+        working-directory: poster
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Get Picins Library
+        uses: wei/curl@v1
+        with:
+          args: -L -O http://mirrors.ctan.org/macros/latex209/contrib/picins/picins.sty
+
+      - name: Get BaPoster Library
+        uses: wei/curl@v1
+        with:
+          args: -O https://raw.githubusercontent.com/anriseth/baposter/master/baposter.cls
+
+      - name: Build Poster
+        run: make
+
+      - name: Upload PDF
+        uses: actions/upload-artifact@v3
+        with:
+          name: Poster
+          path: poster/poster.pdf
