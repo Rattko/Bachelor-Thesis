@@ -12,7 +12,7 @@ import mlflow
 import numpy as np
 import pandas as pd
 import scipy.stats as ss
-from mlflow.entities.run_info import RunInfo
+from mlflow.entities.run import Run
 from tqdm import tqdm
 
 from core.utils import get_resampler_name
@@ -25,7 +25,6 @@ RED = '#B52440'
 
 # Names of datasets and their IDs ordered by the level of imbalance in descending order
 datasets = {
-    '42252': 'Asteroid',
     '4154': 'Credit Card Subset',
     '1597': 'Credit Card',
     '1069': 'PC2',
@@ -41,7 +40,9 @@ datasets = {
     '4135': 'Amazon Employee',
     '131': 'BNG - Sick',
     '1040': 'Sylva Prior',
-    '1180': 'BNG - Spect'
+    '1180': 'BNG - Spect',
+    '3': 'Graph - Embedding',
+    '2': 'Graph - Raw'
 }
 
 # Names of preprocessing methods in the order of appearance in the thesis
@@ -85,7 +86,7 @@ def datasets_stats(to_latex: bool = False) -> pd.DataFrame:
 
     if to_latex:
         styler = stats.style.format(na_rep='N/A', precision=3).hide()
-        styler.to_latex('./thesis/tables/datasets.tex', hrules=True, label='table:datasets')
+        styler.to_latex('./tables/datasets.tex', hrules=True, label='table:datasets')
 
     return stats
 
@@ -103,16 +104,15 @@ def preprocessings_configurations(to_latex: bool = False) -> pd.DataFrame:
 
     if to_latex:
         styler = configs.style.format(na_rep='N/A', precision=3).hide()
-        styler.to_latex('./thesis/tables/configurations.tex', hrules=True, label='table:configs')
+        styler.to_latex('./tables/configurations.tex', hrules=True, label='table:configs')
 
     return configs
 
 
-def plot_preproc_times(runs_info: list[RunInfo]) -> None:
+def plot_preproc_times(runs: list[Run], save: bool = False) -> None:
     times = {key: [] for key in preprocessings[::-1]}
 
-    for run_info in tqdm(runs_info, desc='Gathering Preprocessing Times', leave=False):
-        run = mlflow.get_run(run_info.run_id)
+    for run in tqdm(runs, desc='Gathering Preprocessing Times', leave=False):
         preproc = run.data.tags['preprocessing']
 
         if preproc != 'baseline':
@@ -139,53 +139,58 @@ def plot_preproc_times(runs_info: list[RunInfo]) -> None:
     parts['cquantiles'].set_color(YELLOW)
 
     # Save as .pdf instead of .eps as the plot needs transparency
-    plt.savefig('./thesis/figures/preprocessing_times.pdf', dpi=800, bbox_inches='tight')
-    # plt.show()
+    if save:
+        plt.savefig('./figures/preprocessing_times.pdf', dpi=800, bbox_inches='tight')
+    else:
+        plt.show()
 
     plt.close(fig)
 
 
-def plot_proc_ranks(runs_info: list[RunInfo]) -> None:
-    scores = {key: [] for key in preprocessings[::-1]}
+def plot_ranks_distribution(scores: defaultdict[str, pd.DataFrame], save: bool = False) -> None:
+    ranks = [frame.rank(ascending=False) for frame in scores.values()]
 
-    for run_info in tqdm(runs_info, desc='Gathering P-ROC Scores', leave=False):
-        run = mlflow.get_run(run_info.run_id)
-        preproc = run.data.tags['preprocessing']
+    for metric in metrics:
+        scores = {
+            key: np.array([rank.loc[key, metric] for rank in ranks])
+            for key in preprocessings[::-1]
+        }
 
-        scores[preproc].append(float(run.data.metrics['partial_roc_auc']))
+        fig = plt.figure(figsize=(8.2, 11.6))
 
-    fig = plt.figure(figsize=(8.2, 11.6))
+        non_empty_scores = [
+            val[~np.isnan(val)] for val in scores.values() if val != [] or np.all(np.isnan(val))
+        ]
+        ticks_pretty = [
+            preprocessings_pretty[preprocessings.index(name)]
+            for name, val in scores.items() if val != []
+        ]
 
-    non_empty_scores = [val for val in scores.values() if val != []]
-    ticks_pretty = [
-        preprocessings_pretty[preprocessings.index(name)]
-        for name, val in scores.items() if val != []
-    ]
+        parts = plt.violinplot(
+            non_empty_scores, vert=False, showmeans=True,
+            quantiles=[[0.25, 0.5, 0.75]] * len(non_empty_scores)
+        )
 
-    parts = plt.violinplot(
-        non_empty_scores, vert=False, showmeans=True,
-        quantiles=[[0.25, 0.5, 0.75]] * len(non_empty_scores)
-    )
+        plt.xlim(0.9, 18.1)
+        plt.yticks(np.arange(1, len(non_empty_scores) + 1), ticks_pretty, rotation=45)
 
-    plt.xlim([-0.05, 1.05])
-    plt.yticks(np.arange(1, len(non_empty_scores) + 1), ticks_pretty, rotation=45)
+        # Set colours of violin plots
+        parts['cmeans'].set_color(RED)
+        parts['cquantiles'].set_color(YELLOW)
 
-    # Set colours of violin plots
-    parts['cmeans'].set_color(RED)
-    parts['cquantiles'].set_color(YELLOW)
+        # Save as .pdf instead of .eps as the plot needs transparency
+        if save:
+            plt.savefig(f'./figures/{metric}_ranks_distribution.pdf', dpi=800, bbox_inches='tight')
+        else:
+            plt.show()
 
-    # Save as .pdf instead of .eps as the plot needs transparency
-    plt.savefig('./thesis/figures/proc_ranks.pdf', dpi=800, bbox_inches='tight')
-    # plt.show()
-
-    plt.close(fig)
+        plt.close(fig)
 
 
-def preprocessing_time(runs_info: list[RunInfo], to_latex: bool = False) -> pd.DataFrame:
+def preprocessing_time(runs: list[Run], to_latex: bool = False) -> pd.DataFrame:
     times = pd.DataFrame(index=preprocessings, columns=list(datasets.keys()))
 
-    for run_info in tqdm(runs_info, desc='Gathering Preprocessing Times', leave=False):
-        run = mlflow.get_run(run_info.run_id)
+    for run in tqdm(runs, desc='Gathering Preprocessing Times', leave=False):
         dataset = run.data.tags['dataset']
         preproc = run.data.tags['preprocessing']
 
@@ -199,21 +204,23 @@ def preprocessing_time(runs_info: list[RunInfo], to_latex: bool = False) -> pd.D
 
     if to_latex:
         styler = times.style.format(na_rep='N/A', precision=3)
-        styler.to_latex('./thesis/tables/preprocessing_time.tex', hrules=True, label='table:times')
+        styler.to_latex('./tables/preprocessing_time.tex', hrules=True, label='table:times')
 
     return times
 
 
-def mean_rank(scores: defaultdict[str, pd.DataFrame], to_latex: bool = False) -> pd.DataFrame:
-    ranks = [df.rank(ascending=False) for df in scores.values()]
+def calculate_mean_rank(
+    scores: defaultdict[str, pd.DataFrame], to_latex: bool = False
+) -> pd.DataFrame:
+    ranks = [frame.rank(ascending=False) for frame in scores.values()]
     mean_rank = pd.DataFrame(index=ranks[0].index, columns=ranks[0].columns)
 
     for row in ranks[0].index:
         for col in ranks[0].columns:
             rank_sum, rank_count = 0, 0
 
-            for df in ranks:
-                value = df.loc[row, col]
+            for frame in ranks:
+                value = frame.loc[row, col]
 
                 if not np.isnan(value):
                     rank_sum += value
@@ -228,7 +235,7 @@ def mean_rank(scores: defaultdict[str, pd.DataFrame], to_latex: bool = False) ->
     mean_rank.columns = metrics_pretty
 
     if to_latex:
-        with open(f'./thesis/tables/mean_rank.tex', 'w', encoding='utf-8') as table:
+        with open('./tables/mean_rank.tex', 'w', encoding='utf-8') as table:
             contents = (
                 r'\clearpage' '\n'
                 r'\begin{table}' '\n'
@@ -254,7 +261,7 @@ def mean_rank(scores: defaultdict[str, pd.DataFrame], to_latex: bool = False) ->
 def calculate_f1_max(artifact_uri: str) -> float:
     mlflow.artifacts.download_artifacts(f'{artifact_uri}/data_pr_curve.json', dst_path='.')
 
-    with open('data_pr_curve.json', 'r') as data_file:
+    with open('data_pr_curve.json', 'r', encoding='utf-8') as data_file:
         data = json.load(data_file)
 
     os.remove('data_pr_curve.json')
@@ -290,22 +297,21 @@ def friedman_test(tables: defaultdict[str, pd.DataFrame]) -> pd.DataFrame:
 
 
 def scores_by_dataset(
-    runs_info: list[RunInfo], compute_mean_rank: bool = False,
+    runs: list[Run], ranks_distribution: bool = False, compute_mean_rank: bool = False,
     test: bool = False, to_latex: bool = False
 ) -> defaultdict[str, pd.DataFrame]:
     tables: defaultdict[str, pd.DataFrame] = defaultdict(
         lambda: pd.DataFrame(index=preprocessings, columns=metrics)
     )
 
-    for run_info in tqdm(runs_info, desc='Gathering Scores', leave=False):
-        run = mlflow.get_run(run_info.run_id)
+    for run in tqdm(runs, desc='Gathering Scores', leave=False):
         dataset = run.data.tags['dataset']
         preproc = run.data.tags['preprocessing']
 
         for metric in metrics:
             if metric == 'f1_max':
                 tables[dataset].loc[preproc, metric] = np.nanmax(
-                    [tables[dataset].loc[preproc, metric], calculate_f1_max(run_info.artifact_uri)]
+                    [tables[dataset].loc[preproc, metric], calculate_f1_max(run.info.artifact_uri)]
                 )
                 continue
 
@@ -313,8 +319,11 @@ def scores_by_dataset(
                 [tables[dataset].loc[preproc, metric], run.data.metrics[metric]]
             )
 
+    if ranks_distribution:
+        plot_ranks_distribution(tables)
+
     if compute_mean_rank:
-        mean_rank(tables, to_latex=to_latex)
+        calculate_mean_rank(tables, to_latex=to_latex)
 
     if test:
         friedman_test(tables)
@@ -327,7 +336,7 @@ def scores_by_dataset(
             styler = frame.style.format(na_rep='N/A', precision=3) \
                         .highlight_max(props='textbf:--rwrap;')
 
-            with open(f'./thesis/tables/{dataset}_metrics.tex', 'w', encoding='utf-8') as table:
+            with open(f'./tables/{dataset}_metrics.tex', 'w', encoding='utf-8') as table:
                 contents = (
                     r'\clearpage' '\n'
                     r'\begin{table}' '\n'
@@ -353,14 +362,20 @@ def scores_by_dataset(
 def main(tracking_uri: str, experiment_name: str) -> None:
     mlflow.set_tracking_uri(tracking_uri)
     experiment = mlflow.get_experiment_by_name(experiment_name)
+
     runs_info = [
         run for run in mlflow.list_run_infos(experiment.experiment_id, max_results=10000)
         if run.status == 'FINISHED'
     ]
+    runs = [
+        mlflow.get_run(run_info.run_id)
+        for run_info in tqdm(runs_info, desc='Gathering Runs', leave=False)
+    ]
 
-    plot_preproc_times(runs_info)
-    plot_proc_ranks(runs_info)
-    scores_by_dataset(runs_info, compute_mean_rank=True, test=True, to_latex=True)
+    plot_preproc_times(runs)
+    scores_by_dataset(
+        runs, ranks_distribution=True, compute_mean_rank=True, test=True, to_latex=True
+    )
 
 
 if __name__ == '__main__':
