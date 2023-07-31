@@ -3,6 +3,7 @@
 import lzma
 import pickle
 
+import numpy as np
 import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
@@ -18,9 +19,7 @@ def main(directory: str, train_file_path: str, test_file_path: str) -> None:
         test_data = pd.read_csv(test_file)
 
         data = pd.concat((train_data, test_data), ignore_index=True)
-
-    target = data['label']
-    data.drop(['attack_cat', 'label'], axis=1, inplace=True)
+        data.drop(['attack_cat'], axis=1, inplace=True)
 
     pipeline = Pipeline([
         ('transformer', ColumnTransformer(
@@ -32,6 +31,19 @@ def main(directory: str, train_file_path: str, test_file_path: str) -> None:
     ])
 
     data = pipeline.fit_transform(data)
+
+    # Switch target labels as we expect the minority class to have label 1
+    data[:, -1] = (data[:, -1] + 1) % 2
+
+    # Select minority samples to keep
+    minority_to_keep = np.random.choice(
+        np.where(data[:, -1] == 1)[0], size=int(sum(data[:, -1] == 1) / 10), replace=False
+    )
+
+    data = np.concatenate((data[data[:, -1] == 0], data[minority_to_keep]), axis=0)
+
+    target = data[:, -1]
+    data = data[:, :-1]
 
     dataset = Dataset(
         dataset_id='unsw',
@@ -50,4 +62,4 @@ def main(directory: str, train_file_path: str, test_file_path: str) -> None:
 
 
 if __name__ == '__main__':
-    main('datasets', 'unsw-train.csv', 'unsw-test.csv')
+    main('datasets', 'datasets/unsw/unsw-train.csv', 'datasets/unsw/unsw-test.csv')
