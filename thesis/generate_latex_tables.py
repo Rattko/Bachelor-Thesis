@@ -25,6 +25,7 @@ RED = '#B52440'
 
 # Names of datasets and their IDs ordered by the level of imbalance in descending order
 datasets = {
+    '42252': 'Asteroid',
     '4154': 'Credit Card Subset',
     '1597': 'Credit Card',
     '1069': 'PC2',
@@ -33,14 +34,18 @@ datasets = {
     '40900': 'Satellite',
     '1178': 'BNG - Solar Flare',
     '310': 'Mammography',
+    'ids': 'CIC-IDS-2017',
     '977': 'Letter',
     '42680': 'Relevant Images',
     '1216': 'Click Prediction V1',
     '1217': 'Click Prediction V2',
+    'unsw': 'UNSW-NB15',
     '4135': 'Amazon Employee',
     '131': 'BNG - Sick',
     '1040': 'Sylva Prior',
     '1180': 'BNG - Spect',
+    'pdf': 'CIC-Evasive-PDF',
+    'ember': 'Ember',
     '3': 'Graph - Embedding',
     '2': 'Graph - Raw'
 }
@@ -61,12 +66,12 @@ preprocessings_pretty = [
 ]
 
 metrics = [
-    'balanced_accuracy', 'precision', 'recall', 'f1_max', 'pr_auc',
-    'matthews_corr_coef', 'roc_auc', 'partial_roc_auc'
+    'balanced_accuracy', 'precision', 'recall', 'f1_max',
+    'matthews_corr_coef', 'pr_auc', 'roc_auc', 'partial_roc_auc'
 ]
 
 metrics_pretty = [
-    'B. Accuracy', 'Precision', 'Recall', 'F1 Max', 'PR AUC', 'MCC', 'ROC AUC', 'P-ROC AUC'
+    'B. Accuracy', 'Precision', 'Recall', 'F1 Max', 'MCC', 'PR AUC', 'ROC AUC', 'P-ROC AUC'
 ]
 
 
@@ -74,8 +79,10 @@ def datasets_stats(to_latex: bool = False) -> pd.DataFrame:
     stats = pd.DataFrame(columns=['name', 'size', 'majority_size', 'minority_size', 'imbalance'])
 
     for dataset_filename in tqdm(datasets.keys(), desc='Generating Datasets Stats', leave=False):
-        with lzma.open(f'./datasets/{dataset_filename}.pickle', 'rb') as dataset_file:
+        with lzma.open(f'./../datasets/{dataset_filename}.pickle', 'rb') as dataset_file:
             dataset = pickle.load(dataset_file)
+
+            dataset.imbalance = dataset.majority_size / dataset.minority_size
 
         stats.loc[len(stats)] = dataset.to_dict()
 
@@ -159,11 +166,12 @@ def plot_ranks_distribution(scores: defaultdict[str, pd.DataFrame], save: bool =
         fig = plt.figure(figsize=(8.2, 11.6))
 
         non_empty_scores = [
-            val[~np.isnan(val)] for val in scores.values() if val != [] or np.all(np.isnan(val))
+            val[~np.isnan(val)] for val in scores.values()
+            if len(val) != 0 or np.all(np.isnan(val))
         ]
         ticks_pretty = [
             preprocessings_pretty[preprocessings.index(name)]
-            for name, val in scores.items() if val != []
+            for name, val in scores.items() if len(val) != 0
         ]
 
         parts = plt.violinplot(
@@ -320,7 +328,7 @@ def scores_by_dataset(
             )
 
     if ranks_distribution:
-        plot_ranks_distribution(tables)
+        plot_ranks_distribution(tables, save=to_latex)
 
     if compute_mean_rank:
         calculate_mean_rank(tables, to_latex=to_latex)
@@ -359,7 +367,76 @@ def scores_by_dataset(
     return tables
 
 
+def smotes_comparison(runs: list[Run], to_latex: bool = False) -> pd.DataFrame:
+    smotes = ['smote', 'borderline_smote', 'svm_smote', 'adasyn']
+    metrics = ['pr_auc', 'roc_auc', 'partial_roc_auc']
+
+    tables: defaultdict[str, pd.DataFrame] = defaultdict(
+        lambda: pd.DataFrame(index=preprocessings, columns=metrics)
+    )
+
+    for run in tqdm(runs, desc='Gathering Scores', leave=False):
+        dataset = run.data.tags['dataset']
+        preproc = run.data.tags['preprocessing']
+
+        for metric in metrics:
+            tables[dataset].loc[preproc, metric] = np.nanmax(
+                [tables[dataset].loc[preproc, metric], run.data.metrics[metric]]
+            )
+
+    mean_scores = pd.DataFrame(index=smotes, columns=metrics)
+    for smote_variant in smotes:
+        for metric in metrics:
+            mean_scores.loc[smote_variant, metric] = np.nanmean(
+                [scores.loc[smote_variant, metric] for scores in tables.values()]
+            )
+
+    multi_index = pd.MultiIndex.from_product([smotes, metrics], names=['Method', 'Metric'])
+    relative_diffs = pd.DataFrame(index=multi_index, columns=smotes)
+    for i, variant_x in enumerate(smotes):
+        for j, variant_y in enumerate(smotes):
+            if i < j:
+                for metric in metrics:
+                    relative_diffs.loc[(variant_x, metric), variant_y] = (
+                        mean_scores.loc[variant_x, metric] - mean_scores.loc[variant_y, metric]
+                    )
+
+    if to_latex:
+        smotes_pretty = {
+            'smote': 'SMOTE', 'borderline_smote': 'Borderline SMOTE',
+            'svm_smote': 'SVM SMOTE', 'adasyn': 'ADASYN'
+        }
+        metrics_pretty = {'pr_auc': 'PR AUC', 'roc_auc': 'ROC AUC', 'partial_roc_auc': 'P-ROC AUC'}
+
+        relative_diffs = relative_diffs.rename(
+            index={**smotes_pretty, **metrics_pretty}, columns=smotes_pretty
+        )
+
+        styler = relative_diffs.style.format(na_rep='-', precision=3) \
+                    .highlight_max(props='textbf:--rwrap;')
+
+        with open(f'./tables/smote_relative_diffs.tex', 'w', encoding='utf-8') as table:
+            contents = (
+                r'\clearpage' '\n'
+                r'\begin{table}' '\n'
+                r'    \centering' '\n'
+                r'    \setlength\tabcolsep{2pt}' '\n'
+                r'        \begin{tabularx}{\textwidth}{lRRRR}' '\n'
+                f'            {styler.to_latex(hrules=True)}'
+                r'        \end{tabularx}' '\n'
+                r'    \label{table:}' '\n'
+                r'\end{table}'
+            )
+
+            table.write(contents)
+
+    return relative_diffs
+
+
 def main(tracking_uri: str, experiment_name: str) -> None:
+    # Set the font in Matplotlib to be the same as in LaTex
+    plt.rcParams.update({'font.family': 'Times New Roman'})
+
     mlflow.set_tracking_uri(tracking_uri)
     experiment = mlflow.get_experiment_by_name(experiment_name)
 
@@ -372,7 +449,7 @@ def main(tracking_uri: str, experiment_name: str) -> None:
         for run_info in tqdm(runs_info, desc='Gathering Runs', leave=False)
     ]
 
-    plot_preproc_times(runs)
+    plot_preproc_times(runs, save=True)
     scores_by_dataset(
         runs, ranks_distribution=True, compute_mean_rank=True, test=True, to_latex=True
     )
