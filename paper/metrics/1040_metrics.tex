@@ -1,0 +1,27 @@
+\begin{table}[H]
+    \centering
+    \setlength\tabcolsep{2pt}
+    \begin{tabularx}{\textwidth}{lRRRRRRRR}
+        & B. Accuracy & Precision & Recall & F1 Max & MCC & PR AUC & ROC AUC & P-ROC AUC \\
+        \midrule
+        Baseline & 0.996 & 0.940 & 0.995 & 0.971 & \textbf{0.965} & 0.986 & 0.999 & 0.995 \\
+        Random Oversampling & 0.989 & \textbf{0.956} & 0.982 & 0.969 & 0.959 & 0.984 & 0.999 & 0.999 \\
+        SMOTE & 0.989 & 0.940 & 0.982 & 0.969 & 0.958 & 0.984 & 0.999 & 0.999 \\
+        Borderline SMOTE & \textbf{0.997} & 0.948 & \textbf{1.000} & 0.973 & 0.962 & 0.987 & 0.999 & 0.999 \\
+        SVM SMOTE & 0.997 & 0.936 & \textbf{1.000} & 0.971 & 0.961 & 0.986 & 0.999 & 0.999 \\
+        KMeans SMOTE & 0.991 & 0.948 & 0.986 & 0.967 & 0.965 & 0.982 & 0.999 & 0.999 \\
+        ADASYN & 0.991 & 0.952 & 0.986 & 0.967 & 0.960 & 0.980 & 0.999 & 0.999 \\
+        Random Undersampling & 0.987 & 0.709 & \textbf{1.000} & 0.961 & 0.831 & 0.981 & 0.999 & 0.999 \\
+        CNN & N/A & N/A & N/A & N/A & N/A & N/A & N/A & N/A \\
+        ENN & 0.997 & 0.936 & \textbf{1.000} & 0.961 & 0.956 & 0.974 & 0.999 & 0.993 \\
+        Repeated ENN & 0.995 & 0.932 & 0.995 & 0.963 & 0.961 & 0.977 & 0.999 & 0.993 \\
+        All KNN & 0.995 & 0.925 & 0.995 & 0.961 & 0.957 & 0.972 & 0.999 & 0.992 \\
+        Near Miss & 0.997 & 0.940 & \textbf{1.000} & \textbf{0.974} & \textbf{0.965} & \textbf{0.990} & \textbf{1.000} & \textbf{1.000} \\
+        Tomek Links & 0.994 & 0.909 & 0.995 & 0.961 & 0.948 & 0.978 & 0.999 & 0.993 \\
+        One-Sided Selection & 0.991 & 0.932 & 0.986 & 0.959 & 0.956 & 0.978 & 0.999 & 0.992 \\
+        NCL & 0.994 & 0.916 & 0.995 & 0.960 & 0.947 & 0.973 & 0.999 & 0.992 \\
+        Cluster Centroids & 0.996 & 0.899 & \textbf{1.000} & 0.957 & 0.945 & 0.982 & 0.999 & 0.999 \\
+    \end{tabularx}
+    \vspace{1mm}
+    \caption{\textbf{Dataset Sylva Prior.}}
+\end{table}

@@ -1,0 +1,29 @@
+name: Build LaTex Paper
+
+on:
+  push:
+    paths:
+      - 'paper/**'
+      - '.github/workflows/paper.yml'
+  workflow_dispatch:
+
+jobs:
+  build-paper:
+    runs-on: ubuntu-latest
+    container: { image: 'aergus/latex' }
+    defaults:
+      run:
+        working-directory: paper
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Build Paper
+        run: make
+
+      - name: Upload PDF
+        uses: actions/upload-artifact@v3
+        with:
+          name: Paper
+          path: paper/paper.pdf

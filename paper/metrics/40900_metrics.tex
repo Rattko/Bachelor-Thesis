@@ -1,0 +1,27 @@
+\begin{table}[H]
+    \centering
+    \setlength\tabcolsep{2pt}
+    \begin{tabularx}{\textwidth}{lRRRRRRRR}
+        & B. Accuracy & Precision & Recall & F1 Max & MCC & PR AUC & ROC AUC & P-ROC AUC \\
+        \midrule
+        Baseline & 0.553 & \textbf{1.000} & 0.105 & 0.698 & 0.322 & 0.633 & 0.956 & 0.800 \\
+        Random Oversampling & 0.789 & \textbf{1.000} & 0.579 & 0.788 & 0.758 & 0.805 & 0.993 & 0.861 \\
+        SMOTE & 0.868 & 0.929 & 0.737 & 0.824 & 0.800 & 0.867 & 0.995 & 0.900 \\
+        Borderline SMOTE & 0.868 & \textbf{1.000} & 0.737 & \textbf{0.848} & \textbf{0.857} & 0.851 & 0.995 & 0.896 \\
+        SVM SMOTE & 0.866 & \textbf{1.000} & 0.737 & 0.813 & 0.825 & 0.856 & 0.994 & 0.900 \\
+        KMeans SMOTE & 0.789 & \textbf{1.000} & 0.579 & 0.813 & 0.725 & 0.865 & \textbf{0.996} & 0.897 \\
+        ADASYN & 0.868 & 0.933 & 0.737 & 0.824 & 0.827 & 0.855 & 0.996 & \textbf{0.996} \\
+        Random Undersampling & 0.949 & 0.237 & 0.947 & 0.710 & 0.446 & 0.766 & 0.989 & 0.988 \\
+        CNN & 0.881 & 0.560 & 0.789 & 0.788 & 0.636 & 0.769 & 0.985 & 0.856 \\
+        ENN & 0.841 & \textbf{1.000} & 0.684 & 0.813 & 0.723 & \textbf{0.867} & 0.995 & 0.904 \\
+        Repeated ENN & 0.841 & \textbf{1.000} & 0.684 & 0.813 & 0.723 & \textbf{0.867} & 0.995 & 0.904 \\
+        All KNN & 0.840 & 0.722 & 0.684 & 0.750 & 0.699 & 0.790 & 0.977 & 0.851 \\
+        Near Miss & 0.889 & 0.484 & \textbf{1.000} & 0.774 & 0.611 & 0.773 & 0.979 & 0.979 \\
+        Tomek Links & 0.760 & 0.588 & 0.526 & 0.621 & 0.550 & 0.688 & 0.967 & 0.788 \\
+        One-Sided Selection & 0.787 & 0.647 & 0.579 & 0.629 & 0.607 & 0.695 & 0.971 & 0.798 \\
+        NCL & 0.815 & \textbf{1.000} & 0.632 & 0.813 & 0.758 & 0.831 & 0.994 & 0.874 \\
+        Cluster Centroids & \textbf{0.961} & 0.367 & 0.947 & 0.788 & 0.582 & 0.830 & 0.995 & 0.995 \\
+    \end{tabularx}
+    \vspace{1mm}
+    \caption{\textbf{Dataset Satellite.}}
+\end{table}

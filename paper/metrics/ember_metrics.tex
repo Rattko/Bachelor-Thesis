@@ -1,0 +1,27 @@
+\begin{table}[H]
+    \centering
+    \setlength\tabcolsep{2pt}
+    \begin{tabularx}{\textwidth}{lRRRRRRRR}
+        & B. Accuracy & Precision & Recall & F1 Max & MCC & PR AUC & ROC AUC & P-ROC AUC \\
+        \midrule
+        Baseline & 0.937 & \textbf{0.980} & 0.877 & \textbf{0.931} & \textbf{0.918} & \textbf{0.974} & \textbf{0.993} & 0.981 \\
+        Random Oversampling & 0.902 & 0.797 & 0.834 & 0.819 & 0.786 & 0.715 & 0.907 & 0.907 \\
+        SMOTE & 0.917 & 0.774 & 0.871 & 0.833 & 0.792 & 0.749 & 0.934 & 0.934 \\
+        Borderline SMOTE & 0.919 & 0.791 & 0.870 & 0.835 & 0.798 & 0.759 & 0.936 & 0.936 \\
+        SVM SMOTE & 0.920 & 0.779 & 0.876 & 0.837 & 0.799 & 0.756 & 0.938 & 0.938 \\
+        KMeans SMOTE & N/A & N/A & N/A & N/A & N/A & N/A & N/A & N/A \\
+        ADASYN & 0.919 & 0.777 & 0.871 & 0.837 & 0.797 & 0.755 & 0.936 & 0.935 \\
+        Random Undersampling & \textbf{0.956} & 0.809 & 0.948 & 0.908 & 0.854 & 0.964 & 0.990 & \textbf{0.990} \\
+        CNN & N/A & N/A & N/A & N/A & N/A & N/A & N/A & N/A \\
+        ENN & 0.949 & 0.973 & 0.911 & 0.926 & 0.915 & 0.972 & 0.992 & 0.980 \\
+        Repeated ENN & 0.953 & 0.973 & 0.933 & 0.928 & 0.917 & 0.972 & 0.992 & 0.980 \\
+        All KNN & 0.951 & 0.931 & 0.926 & 0.920 & 0.907 & 0.970 & 0.992 & 0.980 \\
+        Near Miss & 0.947 & 0.827 & \textbf{0.981} & 0.906 & 0.855 & 0.957 & 0.988 & 0.987 \\
+        Tomek Links & 0.894 & 0.812 & 0.814 & 0.819 & 0.788 & 0.756 & 0.913 & 0.891 \\
+        One-Sided Selection & 0.937 & 0.977 & 0.877 & 0.928 & 0.916 & 0.972 & 0.992 & 0.979 \\
+        NCL & 0.950 & 0.922 & 0.911 & 0.920 & 0.905 & 0.969 & 0.992 & 0.981 \\
+        Cluster Centroids & N/A & N/A & N/A & N/A & N/A & N/A & N/A & N/A \\
+    \end{tabularx}
+    \vspace{1mm}
+    \caption{\textbf{Dataset Ember.}}
+\end{table}

@@ -1,0 +1,894 @@
+\documentclass[conference]{IEEEtran}
+
+\usepackage{amsfonts, amsmath, amssymb}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage[hidelinks]{hyperref}
+\usepackage{multirow}
+\usepackage{rotating}
+\usepackage{scrextend}
+\usepackage{tabularx}
+
+\def\BibTeX{
+    {\rm B\kern-0.05em{\sc i\kern-0.025em b}\kern-0.08em
+    T\kern-0.1667em\lower0.7ex\hbox{E}\kern-0.125emX}
+}
+
+\begin{document}
+
+\title{Benchmark of Data Preprocessing Methods for Imbalanced Classification}
+
+\author{
+    \IEEEauthorblockN{
+        Radovan Halu\v{s}ka\IEEEauthorrefmark{1}\IEEEauthorrefmark{3},
+        Jan Brabec\IEEEauthorrefmark{1}\IEEEauthorrefmark{2} and
+        Tom\'{a}\v{s} Kom\'{a}rek\IEEEauthorrefmark{1}\IEEEauthorrefmark{2}
+    }
+    \IEEEauthorblockA{
+        \IEEEauthorrefmark{1}Cisco Systems, Inc., Karlovo Namesti 10 Street, Prague, Czech Republic \\ \{rhaluska,janbrabe,tomkomar\}@cisco.com
+    }
+    \IEEEauthorblockA{
+        \IEEEauthorrefmark{2}Czech Technical University in Prague, Faculty of Electrical Engineering, Czech Republic
+    }
+    \IEEEauthorblockA{
+        \IEEEauthorrefmark{3}Faculty of Mathematics and Physics, Charles University, Prague, Czech Republic
+    }
+}
+
+\IEEEoverridecommandlockouts
+\IEEEpubid{
+    \makebox[\columnwidth]{978-1-6654-8045-1/22/\$31.00~\copyright2022 IEEE \hfill}
+    \hspace{\columnsep}
+    \makebox[\columnwidth]{}
+}
+
+\maketitle
+\IEEEpubidadjcol
+
+\begin{abstract}
+    Severe class imbalance is one of the main conditions that make machine learning in
+    cybersecurity difficult. A variety of dataset preprocessing methods have been introduced over
+    the years. These methods modify the training dataset by oversampling, undersampling or a
+    combination of both to improve the predictive performance of classifiers trained on this
+    dataset. Although these methods are used in cybersecurity occasionally, a comprehensive,
+    unbiased benchmark comparing their performance over a variety of cybersecurity problems is
+    missing. This paper presents a benchmark of 16 preprocessing methods on six cybersecurity
+    datasets together with 17 public imbalanced datasets from other domains. We test the methods
+    under multiple hyperparameter configurations and use an AutoML system to train classifiers on
+    the preprocessed datasets, which reduces potential bias from specific hyperparameter or
+    classifier choices. Special consideration is also given to evaluating the methods using
+    appropriate performance measures that are good proxies for practical performance in real-world
+    cybersecurity systems. The main findings of our study are: 1) Most of the time, a data
+    preprocessing method that improves classification performance exists. 2) Baseline approach of
+    doing nothing outperformed a large portion of methods in the benchmark. 3) Oversampling methods
+    generally outperform undersampling methods. 4) The most significant performance gains are
+    brought by the standard SMOTE algorithm and more complicated methods provide mainly incremental
+    improvements at the cost of often worse computational performance.
+\end{abstract}
+
+\begin{IEEEkeywords}
+    machine learning, cybersecurity, classification, imbalanced classification
+\end{IEEEkeywords}
+
+
+\section{Introduction}
+
+A classification problem is said to be class-imbalanced when the class prior probability of at
+least one class, usually the class of interest, is significantly smaller than the prior probability
+of some other class. Class-imbalanced problems occur across a variety of machine learning
+application domains such as medicine~\cite{medical-imb-data},
+finance~\cite{fraud-detection-imb-data, bank-fraud-imb-data}, astronomy~\cite{astronomy-imb-data}
+and many others.
+
+Specifically, in cybersecurity, virtually all of the frequently studied classification problems are
+class-imbalanced (e.g. intrusion detection~\cite{bayesian-forests}, malware
+detection~\cite{malware-detection}, phishing detection~\cite{phishing-detection}). Furthermore, the
+class imbalance is frequently severe, with prior probabilities of the classes of interest being
+$10^{-5}$ and lower~\cite{bayesian-forests} because severe malicious behaviour and attacks are
+(thankfully) extremely rare. For example, in network telemetry, the majority of logs are related to
+ordinary (benign) traffic, and only a tiny portion is related to malicious activities.
+Interestingly, a class imbalance exists even in the already small portion of telemetry related to
+malicious activities, as the prevalence of low-risk activities such as malicious advertising and
+tracking is much greater than the prevalence of the most exciting threats with high severity (e.g.
+remote access trojans, ransomware, APTs). The difficulties and the importance of the severe class
+imbalance problem in cybersecurity were, to our knowledge, first mentioned by
+Axelsson~\cite{axelsson} in 2000. Now, more than two decades later, a class imbalance is still
+among the most critical factors that make machine learning in cybersecurity
+difficult~\cite{dos-donts-cybersec, malware-detection-is-hard}.
+
+While slight class imbalance does not usually pose a problem, once it reaches a certain degree,
+machine learning classifiers without appropriate countermeasures cannot learn reliably from the
+data~\cite{learning-from-imb-data}. In such cases, classifiers tend to become biased toward the
+majority class and neglect the underrepresented one, resulting in a situation in which overall
+accuracy is high due to the classifier predicting the majority class all of the time. However,
+other, more relevant performance measures that reflect performance on all classes are poor.
+
+Over the years, there has been a great deal of interest in the imbalanced classification problem.
+Many different approaches were proposed spanning all the major stages of machine learning model
+development. These stages are~\cite{ml-lifecycle}: 1) data management, 2) model learning and 3)
+model verification. Approaches applied in the first stage are sometimes called \emph{data-level
+methods}, while approaches applied in the second stage are called \emph{algorithm-level
+methods}~\cite{johnson2019}. Multiple literature reviews~\cite{chawla2009, kotsiantis2006,
+sokolova2009, learning-from-imb-data, johnson2019} summarising the concepts and popular approaches
+in each stage have been published over time.
+
+In this paper, we focus on data-level methods suitable for class-imbalanced learning. The idea
+behind these methods is centred around modifying the distribution of the training dataset to make
+it less imbalanced. This is, in principle, achieved via either oversampling the minority class or
+undersampling the majority class. Many such methods have been published over the years, and
+sometimes the rationale behind them is contradicting. The current situation concerning which
+methods are worth using when and which are perhaps unnecessarily complex for little to no benefit
+is unclear. In the worst case, this may lead to a promising, high-performing method being ignored
+by the field in favour of a simpler or more traditional one. Our goal in this paper is to improve
+understanding of strengths, weaknesses and various trade-offs (both predictive and computational)
+between a range of the most well-known data-level methods.
+
+To achieve this, we perform an extensive empirical benchmark of data-level methods on various
+datasets spanning different application domains with special attention dedicated to the
+cybersecurity domain. We aim to compare the methods objectively on as equal ground as possible,
+which is helped by us not having any horses in the race. To the best of our knowledge, there does
+not exist a more comprehensive benchmark of data oversampling and undersampling methods.  The
+results help better navigate the problem landscape and select appropriate methods, hopefully
+leading to improved predictive performance on various tasks in cybersecurity and other domains.
+
+The rest of this paper is structured as follows. In the next section, we review the related work
+and other benchmarks of data-level methods that were performed in the past.
+Section~\ref{section:methods} introduces the methods that are included in the benchmark.
+Section~\ref{section:setup} describes the setup of the experiment and its limitations.
+Section~\ref{section:results} contains the experiment results, which are discussed in detail in
+Section~\ref{section:discussion}. The main takeaways are summarised in
+Section~\ref{section:conclusion}.
+
+
+\section{Related Work}
+
+Over the years, many data preprocessing methods suitable for class-imbalanced learning have been
+published, but in comparison, only a relatively small number of benchmarks encompassing an
+extensive range of both methods and datasets exist. Typically, every publication introducing a new
+method includes experimental evaluation, but the scope of these experiments tends to be small. For
+example, a paper introducing ADASYN~\cite{adasyn} contains experiments on five datasets and
+compares the method only against SMOTE~\cite{smote} and plain decision tree baseline.
+
+With that said, there already exist publications that focus mainly on comparing preprocessing
+methods, but usually, they tend to focus only on oversampling methods. Most of these
+studies~\cite{gosain2017, amin2016, barandela2004} are also performed on a relatively small number
+of datasets. An exception is a study by Kovács~\cite{kovacs}, which is very extensive both in terms
+of methods compared and datasets used. However, it focuses only on oversampling methods and also
+does not contain experiments in the cybersecurity domain. Additionally, none of the studies above
+performs as broad a search in hyperparameters and successive classifier models as we do.
+
+In the cybersecurity domain, Wheelus et al.~\cite{wheelus2018} compared several preprocessing
+methods on the UNSW-NB15~\cite{unsw} dataset. Bagui and Li~\cite{bagui2021} compared five
+preprocessing methods on six network intrusion detection datasets and used a feed-forward neural
+network with one hidden layer for classification. Furthermore, the most popular data preprocessing
+methods are known and used in cybersecurity~\cite{ahsan2018, massaoudi2022, akash2022, soe2019,
+azad2021}, but to our knowledge, a broader comparative study is missing.
+
+Lastly, previous studies also summarise the results of individual methods into a single number.
+Usually, this is the average rank or score the method achieved across all datasets. In this paper,
+we provide rank distribution density plots instead of single numbers. These plots show a more
+complete picture as the ranks tend to have a significant variance and overlap across the datasets.
+
+
+\section{Benchmarked Methods}
+\label{section:methods}
+
+This section contains an overview of preprocessing methods used in the benchmark. For the sake of
+space, we refrain from thorough explanations and refer to original publications.
+
+
+\subsection{Oversampling Methods}
+
+Oversampling methods constitute one possible approach to solving the imbalanced classification
+problem. The main goal of oversampling methods is to modify the empirical distribution by
+increasing the number of samples belonging to the minority class. The empirical distribution is
+modified either by duplicating the existing samples or generating new artificial samples until the
+desired imbalance ratio is reached.
+
+The most straightforward approach is called \emph{Random Oversampling}, which, as its name
+suggests, randomly duplicates already existing samples in the dataset.
+
+One of the first and most widely used oversampling methods which produce synthetic data samples is
+\emph{SMOTE}~\cite{smote}. It creates new synthetic examples on the line segments between existing
+examples from the minority class. SMOTE, however, considers all of the minority samples to have the
+same importance. It does not consider prior sample density and does not care about the
+neighbourhood of a minority sample. Various enhancements have been proposed to aid these
+shortcomings of the original SMOTE algorithm. We include four of those enhancements in our
+benchmark, namely \emph{BorderlineSMOTE}~\cite{borderline-smote}, \emph{SVM
+SMOTE}~\cite{svm-smote}, \emph{KMeansSMOTE}~\cite{kmeans-smote} and \emph{ADASYN}~\cite{adasyn}.
+
+BorderlineSMOTE, as opposed to SMOTE, selects only minority samples with at least half of their
+neighbours belonging to the majority class. The idea behind this approach is that minority samples
+surrounded by more majority samples are close to the so-called decision boundary and are,
+therefore, important in classification.
+
+SVM SMOTE builds on the same idea but uses the SVM algorithm instead of the kNN algorithm to detect
+minority samples near the decision boundary.
+
+KMeansSMOTE tries to generate new artificial samples in regions where minority samples are sparse
+and thus avoids further inflation of dense regions. It uses the KMeans clustering algorithm to
+detect clusters containing more minority samples than majority samples. This avoids interpolation
+between noisy minority samples. Subsequently, new samples are generated in each selected cluster
+based on its density, i.e. more samples are generated in sparse clusters.
+
+ADASYN differs from SMOTE by assigning weights to minority samples based on their difficulty in
+learning. Difficulty in learning, in this case, means the portion of k-nearest neighbours that
+belong to the opposite class. More synthetic data is generated in areas where it is hard to learn
+minority samples, and less data is generated in other, easier-to-learn regions.
+
+
+\subsection{Undersampling Methods}
+
+Undersampling methods focus on the majority class, as opposed to the oversampling methods, to
+address the issue of imbalanced classification. These methods reduce the number of samples in the
+majority class to create a more balanced distribution of samples between classes. Most of the
+undersampling methods discussed are so-called \emph{prototype selection} methods. Prototype
+selection methods reduce the number of samples by removing unnecessary samples from the dataset and
+using only a subset of the original data. The Cluster Centroids method is the only example of a
+\emph{prototype generation} method used in the benchmark. Prototype generation methods reduce the
+number of samples by generating new samples, e.g. centroids of clusters obtained by the KMeans
+algorithm, instead of using a subset of the original ones.
+
+Again, the simplest method based on random selection and removal of the majority samples is called
+\emph{Random Undersampling}. The following several methods build on the kNN algorithm and modify it
+to achieve slightly different results.
+
+\emph{Condensed Nearest Neighbours - CNN}~\cite{cnn} reduces a potentially massive dataset into a
+consistent dataset which, when used in the 1-NN rule, correctly classifies all of the examples from
+the original dataset.
+
+\emph{Edited Nearest Neighbours - ENN}~\cite{enn} classifies all samples in the class to
+undersample by computing k-nearest neighbours for each on the whole original set. It then proceeds
+to remove all such samples under consideration whose actual label does not match the label of most
+of their neighbours.
+
+\emph{Repeated Edited Nearest Neighbours}~\cite{repeated-enn} consists of repeating the previous
+algorithm multiple times to reduce the number of majority samples even further.
+
+\emph{All KNN}~\cite{repeated-enn} uses the same idea as the two previous preprocessing methods to
+eliminate samples from the majority class when there is a label disagreement between a sample under
+consideration and its k-nearest neighbours. However, instead of using a fixed number of neighbours
+to check an agreement, it starts by looking at the single nearest neighbour, then two nearest
+neighbours and so on, until it reaches k-nearest neighbours. A sample is kept in the majority class
+only if its label agrees in all cases.
+
+\emph{Near Miss}~\cite{near-miss} is a collection of three algorithms that use kNN to select
+majority class samples to retain. Near Miss 1 selects majority samples that exhibit the smallest
+average distance to $\mathrm{N}$ closest minority samples. In contrast, Near Miss 2 selects those
+samples that exhibit the smallest average distance to $\mathrm{N}$ furthest minority samples. Near
+Miss 3 selects a given number of closest majority samples for each minority sample.
+
+\emph{Tomek Links}~\cite{tomek-links} is a data-cleaning technique used to clean the area near the
+decision boundary by removing noisy samples called Tomek Links. A pair of points
+$\mathbf{x}_i~\in~S_{min}$, $\mathbf{x}_j~\in~S_{maj}$ belonging to the opposite classes form a
+Tomek Link if there does not exist a sample $\mathbf{x}_k$ such that $\mathrm{d}(\mathbf{x}_i,
+\mathbf{x}_k) \leq \mathrm{d}(\mathbf{x}_i, \mathbf{x}_j)$ or $\mathrm{d}(\mathbf{x}_j,
+\mathbf{x}_k) \leq \mathrm{d}(\mathbf{x}_i, \mathbf{x}_j)$.
+
+\emph{One Sided Selection - OSS}~\cite{one-sided-selection} divides majority samples into noise
+samples, borderline samples, redundant samples and safe samples. OSS detects and removes redundant
+samples using CNN. Afterwards, Tomek Links removes noise and borderline samples, leaving us with
+only safe samples which are kept.
+
+\emph{Neighbourhood Cleaning Rule - NCL}~\cite{ncl} tries to mitigate one major drawback of the OSS
+method by replacing CNN with ENN, as CNN tends to retain noisy samples in the training
+set~\cite{ncl}. Additionally, NCL cleans the neighbourhoods of minority samples. For each minority
+sample, it computes its three-nearest neighbours. If those neighbours misclassify the minority
+sample under consideration, it removes the neighbours of that sample that belong to the majority
+class.
+
+\emph{Cluster Centroids}~\cite{cluster-centroids} is our last method in the benchmark and is the
+only method representing prototype generation undersampling methods. It uses the KMeans algorithm
+to cluster majority class samples into clusters and outputs clusters' centroids as new majority
+samples.
+
+
+\section{Experiment Setup}
+\label{section:setup}
+
+We built a benchmark framework to efficiently and robustly conduct experiments with many different
+preprocessing methods over many datasets reporting as many evaluation metrics as supplied. The core
+idea of the framework is depicted in Figure~\ref{figure:framework}. Each run combines a dataset, a
+preprocessing method, and an instantiation of its hyperparameters found using a grid search. In
+each run, a preprocessing method is applied to the training part of a dataset, yielding a new
+resampled training set, which is then passed to the AutoML component of the framework. We use a
+state-of-the-art AutoML framework Auto-Sklearn~\cite{auto-sklearn-1.0} for selecting, training and
+tuning a classifier suitable for a given dataset. We provide more details about Auto-Sklearn in
+Section~\ref{subsubsection:auto-sklearn}. Once a classifier has been trained, we perform
+predictions using unseen examples from the test set and report evaluation scores achieved.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{plots/diagram.png}
+    \caption{\textbf{High-level architecture of the benchmarking framework.}}
+    \label{figure:framework}
+\end{figure}
+
+
+\subsection{Benchmark Setup}
+
+We ran a benchmark covering 16 preprocessing methods discussed in Section~\ref{section:methods} and
+one no-op baseline method. We covered several possible hyperparameter configurations for each
+method shown in Table~\ref{table:configs}. All implementations of preprocessing methods used in the
+benchmark originate from the \emph{Imbalanced Learn} library~\cite{imblearn}.
+
+Every preprocessing method was run on 23 public and proprietary datasets shown in
+Table~\ref{table:datasets}. Non-cybersecurity public datasets were downloaded from
+OpenML~\cite{openml}. We chose datasets carefully based on multiple criteria such as dataset size,
+amount of missing values and imbalance ratio. We required every dataset from OpenML to be binary
+and to have at least 5000 samples; at most 20\% of samples could have missing values, and the
+minimal imbalance ratio had to be 1:10. Although we focus only on binary classification, imbalanced
+datasets occur in the multi-class environment as well. However, for the sake of simplicity and
+consistency with other authors and publications, we focus only on the binary case. The
+generalisation to the multi-class setting can be easily achieved by employing one-vs-one or
+one-vs-rest schemes to preprocessing methods and micro and macro averaging to evaluation metrics.
+We used 75\% of data samples from each dataset as a training set and the remaining 25\% as a
+testing set. The split was done to retain the original imbalance in both sets.
+
+We utilised Auto-Sklearn~\ref{subsubsection:auto-sklearn} to find, train and tune the
+best-performing classifier on the training set using five-fold cross-validation as the validation
+technique. Auto-Sklearn was set to optimise the ROC AUC score~\ref{subsubsection:roc-curve}. Each
+run was given a total of 30 minutes for training on public datasets; a single machine learning
+model had 10 minutes to finish training. Unsuccessful runs were not repeated. Due to their sizes,
+it was sufficient to dedicate only five minutes to Auto-Sklearn on proprietary datasets, and no
+repetitions were needed. We did not limit the time for preprocessing step in any way to obtain data
+about the performance of preprocessing methods on datasets of different sizes.
+
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{lr}
+        Method & Hyperparameter Configurations \\
+        \midrule
+        Baseline & 1 \\
+        Random Oversampling & 2 \\
+        SMOTE & 4 \\
+        Borderline SMOTE & 16 \\
+        SVM SMOTE & 8 \\
+        KMeans SMOTE & 4 \\
+        ADASYN & 4 \\
+        Random Undersampling & 2 \\
+        CNN & 2 \\
+        ENN & 4 \\
+        Repeated ENN & 4 \\
+        All KNN & 4 \\
+        Near Miss & 12 \\
+        Tomek Links & 1 \\
+        One-Sided Selection & 2 \\
+        NCL & 8 \\
+        Cluster Centroids & 4 \\
+        \midrule
+        $\Sigma$ & 82 \\
+    \end{tabular}
+
+    \vspace{4mm}
+
+    \caption{
+        \textbf{Hyperparameter Configurations for Preprocessing Methods.} The table shows the
+        number of available hyperparameter configurations in the benchmark.
+    }
+    \label{table:configs}
+\end{table}
+
+\begin{table}
+    \centering
+    \begin{tabular}{lrrr}
+        Name & Maj. Size & Min. Size & Imbalance \\
+        \midrule
+        Asteroid & 125,975 & 156 & 807.532 \\
+        Credit Card Subset~\cite{credit-card} & 14,217 & 23 & 618.130 \\
+        Credit Card~\cite{credit-card} & 284,315 & 492 & 577.876 \\
+        PC2~\cite{pc2+mc1} & 5,566 & 23 & 242.000 \\
+        MC1~\cite{pc2+mc1} & 9,398 & 68 & 138.206 \\
+        Employee Turnover & 33,958 & 494 & 68.741 \\
+        Satellite~\cite{satellite} & 5,025 & 75 & 67.000 \\
+        BNG - Solar Flare & 648,320 & 15,232 & 42.563 \\
+        Mammography & 10,923 & 260 & 42.012 \\
+        Letter~\cite{lttr-dataset} & 19,187 & 813 & 23.600 \\
+        Relevant Images & 129,149 & 5,582 & 23.137 \\
+        Click Prediction V1 & 1,429,610 & 66,781 & 21.407 \\
+        Click Prediction V2 & 142,949 & 6,690 & 21.368 \\
+        Amazon Employee & 30,872 & 1,897 & 16.274 \\
+        BNG - Sick & 938,761 & 61,239 & 15.329 \\
+        Sylva Prior & 13,509 & 886 & 15.247 \\
+        BNG - Spect & 915,437 & 84,563 & 10.826 \\
+        \midrule
+        CIC-IDS-2017~\cite{ids} & 227,132 & 5,565 & 40.814 \\
+        UNSW-NB15~\cite{unsw} & 164,673 & 9,300 & 17.707 \\
+        CIC-Evasive-PDF~\cite{pdf} & 4,468 & 555 & 8.050 \\
+        Ember~\cite{ember} & 200,000 & 26,666 & 7.500 \\
+        Graph - Embedding~\cite{dvorak2022} & 394 & 154 & 2.558 \\
+        Graph - Raw~\cite{dvorak2022} & 394 & 154 & 2.558 \\
+    \end{tabular}
+
+    \vspace{4mm}
+
+    \caption{
+        \textbf{Datasets.} The table shows basic information about the datasets used in the
+        benchmark. The upper part of the table shows publicly available non-cybersecurity datasets;
+        the lower part shows cybersecurity datasets and two proprietary datasets concerning the
+        classification of nodes in network graphs.
+    }
+    \label{table:datasets}
+\end{table}
+
+
+\subsubsection{AutoSklearn}
+\label{subsubsection:auto-sklearn}
+
+Auto-Sklearn~\cite{auto-sklearn-1.0} is a library for automated model selection and hyperparameter
+tuning. Auto-Sklearn allows us to explore many models without introducing our own bias into the
+process. We chose Auto-Sklearn for its significantly better performance than other competing AutoML
+systems~\cite{auto-sklearn-1.0}. Although the second version of Auto-Sklearn, bringing substantial
+advances~\cite{auto-sklearn-2.0}, has been available since 2020, we chose not to use it as it was
+still in an experimental phase at the time of the experiments.
+
+Auto-Sklearn extends existing AutoML architectures utilising the Bayesian optimiser by using
+meta-learning and ensemble building to further boost the system's performance. We briefly explain
+how each of the components works and provide comments in cases where we have needed to modify the
+behaviour of Auto-Sklearn to allow complete control over the experiment.
+
+Bayesian optimisation serves as an intelligent random search for hyperparameter tuning. It is a
+powerful technique suitable for finding the extrema of objective functions expensive to evaluate,
+such as tuning hyperparameters in a machine learning model, in as few sampling steps as
+possible~\cite{bayesian-opt}. Bayesian optimisation fits a probabilistic model capturing a
+relationship between hyperparameters and model performance. The probabilistic model suggests a
+promising configuration of hyperparameters based on its current beliefs. It evaluates the model
+using these hyperparameters and uses the results to update its beliefs in a loop. It can explore
+new regions and exploit known regions to boost performance further~\cite{auto-sklearn-1.0}.
+
+Meta-learning uses previous knowledge stored in a knowledge base consisting of pairs of dataset
+characteristics and a machine learning model + hyperparameters exhibiting the best performance on
+that dataset to suggest models that are likely to perform well on a new dataset. Characteristics
+are viewed as vectors living in a normed meta-features vector space allowing us to use a notion of
+distance between datasets to find similar ones and use models that performed well on those datasets
+as a starting point for further tuning. Auto-Sklearn can quickly suggest configurations that are
+likely to perform well on a new dataset to the Bayesian optimiser. Unfortunately, we encountered
+various errors with meta-learning and could not get it to work correctly, so we disabled it
+entirely for our experiment.
+
+The data preprocessing step in Auto-Sklearn consists of missing values imputation, one-hot
+encoding, data normalisation, scaling and centring. Feature preprocessing tries to create new
+features using polynomial features or select a subset of features using PCA or ICA. Auto-Sklearn
+also sometimes chooses to do the balancing. Balancing adjusts the weights of individual classes to
+punish a particular class's misclassification more than the misclassification of other ones. We
+disabled all three steps altogether to gain complete control over the experiments. We apply the
+same data preprocessing steps to all datasets and do not perform any feature preprocessing.
+
+Auto-Sklearn uses a list of 15 classification algorithms in its search. The list can be found on
+their GitHub. We have excluded Multi-Layer Perceptron from the list as it consumes a significant
+amount of resources during training, and the tabular datasets used in the experiment do not require
+the use of neural networks~\cite{nn-for-tabular-data}.
+
+
+\subsection{Performance Measures}
+
+We now present a list of performance measures we used in the benchmark. We did not use metrics such
+as accuracy and balanced accuracy as they are not suitable measures of the classifier's performance
+in imbalanced problems~\cite{brabec2018}. In addition to the measures reported below, we also
+measured F-scores and Matthews Correlation Coefficients (MCC)~\cite{matthews1975}. We do not
+include them in the results due to space limitations and because F-score and MCC evaluate the
+classifier only at a single operating point as opposed to the measures described below.
+
+
+\subsubsection{Area Under PR Curve (PR AUC)}
+
+Precision-Recall curve plots Precision and Recall values over possible decision thresholds. $Recall
+= \frac{TP}{TP + FN}$ is plotted on the horizontal axis against $Precision = \frac{TP}{TP + FP}$ on
+the vertical axis. A classifier's performance can be assessed by computing the area under the curve
+(PR AUC). The PR curve does not consider the performance on the negative class and is affected by
+the dataset imbalance. If the dataset imbalance differs from the real problem imbalance, the values
+of PR AUC will not only be different, but the ordering of the classifiers can also
+change~\cite{brabec2020}.
+
+
+\subsubsection{Area Under ROC Curve (ROC AUC)}
+\label{subsubsection:roc-curve}
+
+Receiver Operating Characteristic curve plots False Positive Rate, $FPR = \frac{FP}{FP + TN}$, on
+the horizontal axis against True Positive Rate, $TPR = \frac{TP}{TP + FN}$, on the vertical axis,
+computed over possible decision thresholds. Again, a single number giving the performance of a
+classifier can be obtained by computing the area under the curve. As FPR and TPR go against each
+other, the perfect classification performance is obtained at the point $(0, 1)$. The ROC curve is
+not affected by class imbalance. However, in the presence of extreme class imbalance, even a
+classifier achieving high values of ROC AUC may not be practically useful~\cite{brabec2018}. The
+following measure addresses this issue.
+
+
+\subsubsection{Area Under Partial ROC Curve (P-ROC AUC)}
+
+In severely imbalanced problems, even the FPR of $0.1$ may be too high for practical purposes.
+Standard ROC AUC is thus affected by a large region that is irrelevant in
+practice~\cite{brabec2018}. We define the \emph{Partial ROC curve} as an ROC curve with an x-axis
+limited to a narrower interval to only contain values of FPR that may be practically useful.  We
+then compute the area under the partial ROC curve (P-ROC AUC).
+
+The downside is that we need to select the FPR range, and the choice is arbitrary. We decided to
+follow a rule of thumb that for a practically useful classifier, the FPR should be at most as high
+as the dataset's imbalance. Thus in this study, we limit the partial ROC curve's FPR range to the
+interval $(0, \mathrm{dataset\_imbalance})$.
+
+
+\subsection{Limitations}
+\label{subsection:limitations}
+
+The main limitation we have faced is the slowness of Python-based implementations of AutoSklearn
+and preprocessing algorithms from Imbalanced Learn. Although we have previously said we did not
+limit the time for the preprocessing step in any way, we were forced to abort the execution of
+specific runs due to extremely long computation time. Some combinations of a preprocessing method
+and a dataset ran for more than two days until we aborted them. Thus not all preprocessing methods
+finished successfully on all 23 datasets. We also needed to subsample and perform feature selection
+on the Ember dataset in order to complete the computation in a reasonable time and cost. The 300
+most important features were chosen using a Random Forest classifier with the Gini impurity index
+to rank their importance.
+
+Another limitation we had to overcome is that publicly available cybersecurity datasets we have
+found contain almost no imbalance or an imbalance that is nowhere near the real imbalance in the
+domain. We have decided to randomly subsample cybersecurity datasets so that we can get closer to
+the actual distribution. This decision also significantly helped us with the first problem in the
+case of larger cybersecurity datasets, such as CIC-IDS-2017 and Ember. Still, even after
+subsampling, the imbalance ratios are several orders of magnitude below those encountered in
+practical cybersecurity systems. The datasets, however, do not contain enough data to subsample
+further to achieve more realistic imbalances.
+
+
+\section{Results}
+\label{section:results}
+
+Figures~\ref{figure:pr-auc},~\ref{figure:roc-auc}~and~\ref{figure:partial-roc-auc} display the
+distribution of ranks computed for each preprocessing method across all datasets in the benchmark.
+Ranks were computed from metrics for each preprocessing method separately. Dark marks denote each
+method's minimum, maximum and mean rank, and three blue marks indicate each method's 25th, 50th and
+75th percentiles. Mean ranks are also available in Table~\ref{table:mean-rank}.
+Table~\ref{table:mean-rank-cybersec} shows mean ranks computed only across the cybersecurity
+datasets. We do not show distributions for cybersecurity datasets due to space limitations and a
+smaller sample size. Table~\ref{table:relative-increments} zooms in on the SMOTE algorithm and its
+variants and compares relative differences between these methods. Due to the small number of
+successful runs, we omitted KMeansSMOTE in Table~\ref{table:relative-increments}. Lastly,
+Figure~\ref{figure:preprocessing-times} shows the runtime performance of each method.
+
+\newcolumntype{R}{>{\raggedleft\arraybackslash}X}
+
+\begin{table}
+    \centering
+    \setlength\tabcolsep{2pt}
+
+    \begin{tabularx}{\linewidth}{lRRR}
+        & PR AUC & ROC AUC & P-ROC AUC \\
+        \midrule
+        Baseline & 6.196 // 23 & 6.761 // 23 & 10.891 // 23 \\
+        Random Oversampling & 9.238 // 21 & 9.024 // 21 & 6.929 // 21 \\
+        SMOTE & 6.283 // 23 & 6.174 // 23 & 4.087 // 23 \\
+        Borderline SMOTE & 5.935 // 23 & 6.239 // 23 & 4.500 // 23 \\
+        SVM SMOTE & 4.841 // 22 & 4.909 // 22 & 3.545 // 22 \\
+        KMeans SMOTE & 4.500 // 04 & 2.625 // 04 & 4.000 // 04 \\
+        ADASYN & 7.955 // 22 & 7.977 // 22 & 5.386 // 22 \\
+        Random Undersampling & 10.318 // 22 & 9.818 // 22 & 5.773 // 22 \\
+        CNN & 11.964 // 14 & 11.821 // 14 & 9.036 // 14 \\
+        ENN & 6.310 // 21 & 6.452 // 21 & 9.524 // 21 \\
+        Repeated ENN & 7.222 // 18 & 6.583 // 18 & 11.056 // 18 \\
+        All KNN & 8.273 // 22 & 8.273 // 22 & 11.159 // 22 \\
+        Near Miss & 11.023 // 22 & 11.341 // 22 & 7.068 // 22 \\
+        Tomek Links & 7.667 // 21 & 7.857 // 21 & 11.810 // 21 \\
+        One-Sided Selection & 8.455 // 22 & 9.091 // 22 & 12.000 // 22 \\
+        NCL & 9.023 // 22 & 8.886 // 22 & 11.068 // 22 \\
+        Cluster Centroids & 10.706 // 17 & 10.235 // 17 & 6.529 // 17 \\
+    \end{tabularx}
+
+    \vspace{4mm}
+
+    \caption{
+        \textbf{Mean Rank Across All Datasets.} The table contains average ranks for each
+        combination of preprocessing method and evaluation metric computed across all datasets. The
+        second number after // indicates the number of datasets used to compute the average.
+    }
+    \label{table:mean-rank}
+\end{table}
+
+\begin{table}
+    \centering
+    \setlength\tabcolsep{2pt}
+
+    \begin{tabularx}{\linewidth}{lRRR}
+        & PR AUC & ROC AUC & P-ROC AUC \\
+        \midrule
+        Baseline & 5.167 // 06 & 6.500 // 06 & 11.000 // 06 \\
+        Random Oversampling & 8.667 // 06 & 8.667 // 06 & 7.333 // 06 \\
+        SMOTE & 5.500 // 06 & 5.833 // 06 & 4.667 // 06 \\
+        Borderline SMOTE & 7.000 // 06 & 8.167 // 06 & 5.667 // 06 \\
+        SVM SMOTE & 5.000 // 06 & 5.000 // 06 & 4.500 // 06 \\
+        KMeans SMOTE & 3.500 // 02 & 1.250 // 02 & 1.000 // 02 \\
+        ADASYN & 7.500 // 06 & 8.583 // 06 & 5.667 // 06 \\
+        Random Undersampling & 11.667 // 06 & 11.167 // 06 & 6.167 // 06 \\
+        CNN & 14.667 // 03 & 12.000 // 03 & 10.667 // 03 \\
+        ENN & 8.000 // 06 & 6.750 // 06 & 10.667 // 06 \\
+        Repeated ENN & 5.800 // 05 & 5.800 // 05 & 9.800 // 05 \\
+        All KNN & 9.833 // 06 & 9.500 // 06 & 11.500 // 06 \\
+        Near Miss & 12.667 // 06 & 10.333 // 06 & 6.500 // 06 \\
+        Tomek Links & 7.333 // 06 & 8.833 // 06 & 12.167 // 06 \\
+        One-Sided Selection & 8.167 // 06 & 9.833 // 06 & 12.000 // 06 \\
+        NCL & 10.333 // 06 & 10.333 // 06 & 10.333 // 06 \\
+        Cluster Centroids & 9.000 // 04 & 8.125 // 04 & 6.250 // 04 \\
+    \end{tabularx}
+
+    \vspace{4mm}
+
+    \caption{
+        \textbf{Mean Rank Across Cybersecurity Datasets.} The table contains average ranks for each
+        combination of preprocessing method and evaluation metric computed across cybersecurity
+        datasets. The second number after // indicates the number of datasets used to compute the
+        average.
+    }
+    \label{table:mean-rank-cybersec}
+\end{table}
+
+\begin{table}
+    \centering
+    \setlength\tabcolsep{2pt}
+
+    \begin{tabularx}{0.83\linewidth}{ll|RRRRR}
+        &  & \begin{turn}{90}Border. SMOTE\end{turn} & \begin{turn}{90}SVM SMOTE\end{turn} & \begin{turn}{90}ADASYN\end{turn} \\
+        Method & Metric &  &  &  \\
+        \midrule
+        \multirow[c]{3}{*}{SMOTE} & PR AUC & 0.007 & -0.012 & -0.018 \\
+        & ROC AUC & -0.012 & -0.018 & -0.012 \\
+        & P-ROC AUC & -0.003 & -0.015 & -0.006 \\
+        \multirow[c]{3}{*}{Border. SMOTE} & PR AUC & - & -0.020 & -0.026 \\
+        & ROC AUC & - & -0.006 & -0.000 \\
+        & P-ROC AUC & - & -0.013 & -0.003 \\
+        \multirow[c]{3}{*}{SVM SMOTE} & PR AUC & - & - & -0.006 \\
+        & ROC AUC & - & - & 0.006 \\
+        & P-ROC AUC & - & - & 0.009 \\
+    \end{tabularx}
+
+    \vspace{4mm}
+
+    \caption{
+        \textbf{Incremental differences of SMOTE variants compared to each other.} The table shows
+        the gains/losses of different SMOTE variants compared to each other. The results are
+        differences of means computed across maximal scores attained on each dataset. The
+        differences were computed by subtracting the mean score of a method in a column from the
+        mean score of a method in a row.
+    }
+    \label{table:relative-increments}
+\end{table}
+
+\begin{figure*}
+    \centering
+    \includegraphics[width=0.89\linewidth]{plots/pr_auc_ranks_distribution.pdf}
+    \caption{
+        \textbf{Area under PR Curve (PR AUC).} Ranks for each method were measured across all
+        datasets in the benchmark.
+    }
+    \label{figure:pr-auc}
+\end{figure*}
+
+\begin{figure*}
+    \centering
+    \includegraphics[width=0.89\linewidth]{plots/roc_auc_ranks_distribution.pdf}
+    \caption{
+        \textbf{Area under ROC Curve (ROC AUC).} Ranks for each method were measured across all
+        datasets in the benchmark.
+    }
+    \label{figure:roc-auc}
+\end{figure*}
+
+\begin{figure*}
+    \centering
+    \includegraphics[width=0.89\linewidth]{plots/partial_roc_auc_ranks_distribution.pdf}
+    \caption{
+        \textbf{Area under Partial ROC Curve (P-ROC AUC).} Ranks for each method were measured
+        across all datasets in the benchmark.
+    }
+    \label{figure:partial-roc-auc}
+\end{figure*}
+
+\begin{figure*}
+    \centering
+    \includegraphics[width=0.89\linewidth]{plots/preprocessing_times.pdf}
+    \caption{
+        Runtimes (in seconds) for each preprocessing method were measured across all datasets in
+        the benchmark.
+    }
+    \label{figure:preprocessing-times}
+\end{figure*}
+
+
+\section{Discussion}
+\label{section:discussion}
+
+In this section, we take a deeper look at the results and summarise the most important findings and
+recommendations. Firstly, we analyse the summary results over all datasets. Secondly, we take a
+look specifically at the results on cybersecurity datasets to see whether the findings and
+recommendations differ. Lastly, we discuss the computational performance of the studied methods.
+
+To start with, let us consider the performance of the baseline method, where no preprocessing is
+applied to the training dataset. The baseline method achieved a reasonable rank among all methods
+and across all the measures. In the PR AUC and ROC AUC measures displayed in
+Figures~\ref{figure:pr-auc} and~\ref{figure:roc-auc}, the baseline consistently ranked in the top
+half of the studied methods. In the P-ROC AUC measure in Figure~\ref{figure:partial-roc-auc}, the
+baseline usually ends up in the second half of methods, but it is rarely the worst method. The
+baseline's performance is slightly surprising because all the methods generally claim to bring
+performance gains in these types of problems. We offer several hypotheses to explain this result.
+First, we are looking at summary statistics across a variety of datasets. Some methods are not
+meant to be used in every scenario but are tailored for datasets with specific properties. For
+example, Near Miss~\cite{mani2003} aims to remove samples at the boundary of the majority class.
+This may work if these samples are mainly present due to noise, but if they are valid samples, such
+removal may significantly increase the false positive rate of the classifier. Second, we perform
+hyperparameter tuning of the classification layer via AutoML, which is a much stronger baseline
+than usual. Furthermore, we do not guide the hyperparameter search by accuracy, which is usual, but
+by ROC AUC, which is a better-suited measure for imbalanced problems. Lastly, the performance
+measures we use consider multiple operating points of the final model, and PR AUC and P-ROC AUC
+specifically look at the relevant operating points only. Sometimes, methods are compared via
+measures such as F-score, which consider only a single operating point, and the operating point is
+chosen arbitrarily without proper tuning. Tuning the operating point may have similar effects to
+oversampling or undersampling.
+
+A major takeaway is that, in general, oversampling methods outperform undersampling methods. This
+pattern is visible across all performance measures and is most evident in P-ROC AUC, which we
+consider to be the most practically relevant measure. Before the experiment, our intuition was that
+undersampling of the majority class is one of the least preferable ways to address class imbalance
+because it provides the classifier with less information to extract. The experiment's results
+support this intuition. On rare occasions, undersampling may perform well. However, unless we have
+a good reason to believe that it may improve a particular dataset or we have computation power to
+spare, we should prefer rebalancing the dataset via oversampling. Interestingly, in the P-ROC AUC
+measure, out of all the undersampling methods, simple Random Undersampling achieves the best
+overall rank. This also supports the takeaway that more specialised undersampling methods are not
+general-purpose tools but are best suited for niche datasets with specific properties that the
+methods seek.
+
+Several exciting observations that concern the oversampling methods can be made. In general,
+oversampling methods rank better than the baseline. They outperform the baseline most convincingly
+in the P-ROC AUC measure. In other measures, Random Oversampling tends to perform worse than
+baseline, whereas more sophisticated oversampling methods produce better results. Contrary to the
+undersampling methods, we can also see a clear trend that more sophisticated oversampling methods
+outperform simple Random Oversampling. SMOTE offers the most prominent performance gain.
+BorderlineSMOTE and SVM SMOTE may provide further improvements over plain SMOTE albeit smaller. We
+employed the Friedman test~\cite{stats-comparison} to test whether there is a statistically
+significant difference in ranks between SMOTE, BorderlineSMOTE, SVM SMOTE and ADASYN. The results
+of this test ($p = 0.09$) are not statistically significant at commonly used significance levels.
+
+We now compare the overall ranks discussed above to those achieved specifically on cybersecurity
+datasets in Table~\ref{table:mean-rank-cybersec}. The ranks are similar to mean ranks across all
+datasets in Table~\ref{table:mean-rank}, and the findings above tend to hold. The general trend
+between oversampling and undersampling methods is similar, and SMOTE-based methods are the top
+performers. However, we must highlight an important outlier in the statistics: the EMBER dataset.
+On the EMBER dataset, the top-performing method in the P-ROC AUC measure was Random Undersampling
+followed by Near Miss and NCL. Overall, on EMBER, undersampling methods outperformed oversampling
+methods, with SMOTE, BorderlineSMOTE and SVM SMOTE achieving ranks 12, 10 and 9, respectively. The
+reasons for this may be multiple. The high number of features in the EMBER dataset may hinder the
+performance of methods based on nearest neighbours due to the curse of dimensionality. It is also
+possible that EMBER contains a large number of noisy features which again is a complicating factor
+for methods performing the nearest neighbour search. Still, even though the Random Undersampling
+performed well on the EMBER dataset in this benchmark, we would not recommend relying on it in
+practical systems for the classification of PE files. As we mentioned in
+Section~\ref{subsection:limitations}, in the real world, we face several orders of magnitude higher
+imbalance than we could introduce into the experiment. In the presence of such imbalance, we need
+to achieve extremely low false positive rates and providing the classifier with a vast amount of
+benign files is critical for success.
+
+
+\subsection{Computational Performance}
+
+Even from the perspective of computational performance, oversampling methods achieved slightly
+better runtimes than undersampling methods. Understandably, Random Oversampling and Random
+Undersampling took the least time as they do not perform heavy computations. KMeansSMOTE appears to
+be faster than any of the remaining preprocessing methods. However, we need to keep in mind that
+KMeansSMOTE finished successfully only on four datasets, of which two contained only a couple
+hundred samples. If we do not consider these methods, we can consider the plain SMOTE as the
+fastest method in the study.
+
+On the other side of the spectrum, we see that undersampling methods are generally more
+computationally intensive. SVM SMOTE and CNN stood out from the crowd and were the slowest methods
+in our experiments, peaking with a maximum resampling time of almost 48 hours.
+
+
+\section{Conclusion}
+\label{section:conclusion}
+
+We have conducted a novel study of 16 preprocessing methods on 23 datasets, of which six are from
+the cybersecurity domain. We studied both predictive and computational performance. To that end, we
+implemented a large-scale experiment which employs AutoML to consider a wide range of classifiers
+and includes a hyperparameter search to remove potential sources of bias present in past
+benchmarks.
+
+Our main findings are that using dataset preprocessing when dealing with class-imbalanced
+classification is often beneficial. However, at the same time, a large portion of the methods fails
+to consistently outperform the baseline solution of doing nothing. Most of the time, oversampling
+methods outperform undersampling methods, but exceptions exist. Among the oversampling methods, the
+traditional SMOTE algorithm achieves the most significant performance gains, while its more
+sophisticated variants likely lead to improvements of only incremental nature.
+
+When we isolated our analysis only to the cybersecurity datasets which span multiple cybersecurity
+domains, we reached the same conclusions as above.
+
+Finally, it is essential to note that the method ranking is influenced by the performance measure
+chosen. We include multiple performance measures that are comprehensive and suitable in practical
+classification scenarios when facing class imbalance. Even though the specifics of the rankings
+vary by measure, the main takeaways mentioned above are consistent.
+
+\bibliographystyle{plain}
+\bibliography{bibliography}
+
+
+\clearpage
+\onecolumn
+\appendices
+
+\begin{addmargin}[0.05\textwidth]{0.05\textwidth}
+    % Gotta be inside `addmargin` because the indentation does not work otherwise
+    \section{Additional Figures}
+
+    Appendix A shows the distributions of ranks for metrics that we did not include in the main
+    part of the paper. The distributions of ranks were computed across all datasets in the
+    benchmark. Ranks were computed under various metrics for each preprocessing method separately.
+    The black mark denotes each method’s mean rank, and three blue marks indicate the 25th, 50th
+    and 75th percentile.
+
+    Appendix B shows tables with the detailed results obtained on each dataset. Each table contains
+    the three primary and five additional metrics - Balanced Accuracy, Precision, Recall, F1 Max
+    and Matthews Correlation Coefficient. F1 Max was computed as the maximum achieved over a set of
+    decision thresholds. The tables are listed in the same order as shown in
+    Table~\ref{table:datasets}.
+\end{addmargin}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{plots/balanced_accuracy_ranks_distribution.pdf}
+    \caption{\textbf{Distribution of Ranks for the Balanced Accuracy Evaluation Metric.}}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{plots/precision_ranks_distribution.pdf}
+    \caption{\textbf{Distribution of Ranks for the Precision Evaluation Metric.}}
+\end{figure}
+
+\clearpage
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\linewidth]{plots/recall_ranks_distribution.pdf}
+    \caption{\textbf{Distribution of Ranks for the Recall Evaluation Metric.}}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\linewidth]{plots/f1_max_ranks_distribution.pdf}
+    \caption{\textbf{Distribution of Ranks for the F1 Max Evaluation Metric.}}
+\end{figure}
+
+\clearpage
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{plots/matthews_corr_coef_ranks_distribution.pdf}
+    \caption{\textbf{Distribution of Ranks for the Matthews Correlation Coefficient Evaluation Metric.}}
+\end{figure}
+
+
+\clearpage
+\section{Detailed Results}
+
+\input{metrics/42252_metrics}
+\input{metrics/4154_metrics}
+\input{metrics/1597_metrics}
+\input{metrics/1069_metrics}
+\input{metrics/1056_metrics}
+\input{metrics/43551_metrics}
+\input{metrics/40900_metrics}
+\input{metrics/1178_metrics}
+\input{metrics/310_metrics}
+\input{metrics/977_metrics}
+\input{metrics/42680_metrics}
+\input{metrics/1216_metrics}
+\input{metrics/1217_metrics}
+\input{metrics/4135_metrics}
+\input{metrics/131_metrics}
+\input{metrics/1040_metrics}
+\input{metrics/1180_metrics}
+\input{metrics/ids_metrics}
+\input{metrics/unsw_metrics}
+\input{metrics/pdf_metrics}
+\input{metrics/ember_metrics}
+\input{metrics/3_metrics}
+\input{metrics/2_metrics}
+
+\end{document}

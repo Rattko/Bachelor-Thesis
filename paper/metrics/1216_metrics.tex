@@ -1,0 +1,27 @@
+\begin{table}[H]
+    \centering
+    \setlength\tabcolsep{2pt}
+    \begin{tabularx}{\textwidth}{lRRRRRRRR}
+        & B. Accuracy & Precision & Recall & F1 Max & MCC & PR AUC & ROC AUC & P-ROC AUC \\
+        \midrule
+        Baseline & 0.507 & 0.455 & 0.014 & 0.193 & 0.075 & 0.135 & \textbf{0.721} & 0.556 \\
+        Random Oversampling & N/A & N/A & N/A & N/A & N/A & N/A & N/A & N/A \\
+        SMOTE & 0.595 & 0.091 & 0.473 & 0.144 & 0.095 & 0.078 & 0.638 & 0.635 \\
+        Borderline SMOTE & 0.601 & 0.102 & 0.432 & 0.147 & 0.099 & 0.087 & 0.653 & 0.651 \\
+        SVM SMOTE & 0.598 & 0.102 & 0.375 & 0.148 & 0.104 & 0.094 & 0.657 & 0.656 \\
+        KMeans SMOTE & N/A & N/A & N/A & N/A & N/A & N/A & N/A & N/A \\
+        ADASYN & 0.584 & 0.090 & 0.316 & 0.142 & 0.095 & 0.077 & 0.634 & 0.620 \\
+        Random Undersampling & \textbf{0.653} & 0.097 & \textbf{0.653} & 0.187 & \textbf{0.141} & 0.132 & 0.716 & \textbf{0.716} \\
+        CNN & N/A & N/A & N/A & N/A & N/A & N/A & N/A & N/A \\
+        ENN & 0.543 & \textbf{0.539} & 0.100 & 0.191 & 0.134 & 0.140 & 0.718 & 0.565 \\
+        Repeated ENN & 0.608 & 0.449 & 0.342 & 0.193 & 0.131 & 0.136 & 0.720 & 0.564 \\
+        All KNN & 0.595 & 0.445 & 0.272 & \textbf{0.195} & 0.136 & \textbf{0.140} & 0.719 & 0.566 \\
+        Near Miss & N/A & N/A & N/A & N/A & N/A & N/A & N/A & N/A \\
+        Tomek Links & 0.509 & 0.462 & 0.019 & 0.191 & 0.087 & 0.135 & 0.720 & 0.557 \\
+        One-Sided Selection & 0.510 & 0.496 & 0.020 & 0.193 & 0.093 & 0.136 & 0.720 & 0.557 \\
+        NCL & 0.538 & 0.359 & 0.089 & 0.192 & 0.129 & 0.138 & 0.718 & 0.564 \\
+        Cluster Centroids & N/A & N/A & N/A & N/A & N/A & N/A & N/A & N/A \\
+    \end{tabularx}
+    \vspace{1mm}
+    \caption{\textbf{Dataset Click Prediction V1.}}
+\end{table}

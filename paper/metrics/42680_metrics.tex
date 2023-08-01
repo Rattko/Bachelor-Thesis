@@ -1,0 +1,27 @@
+\begin{table}[H]
+    \centering
+    \setlength\tabcolsep{2pt}
+    \begin{tabularx}{\textwidth}{lRRRRRRRR}
+        & B. Accuracy & Precision & Recall & F1 Max & MCC & PR AUC & ROC AUC & P-ROC AUC \\
+        \midrule
+        Baseline & 0.998 & 0.994 & 0.996 & 0.996 & 0.994 & 1.000 & 1.000 & 1.000 \\
+        Random Oversampling & 0.999 & 0.988 & 0.998 & 0.995 & 0.992 & 1.000 & 1.000 & 1.000 \\
+        SMOTE & 0.998 & 0.989 & 0.997 & \textbf{0.997} & 0.992 & 1.000 & 1.000 & 1.000 \\
+        Borderline SMOTE & 0.998 & \textbf{0.996} & 0.996 & \textbf{0.997} & \textbf{0.996} & 1.000 & 1.000 & 1.000 \\
+        SVM SMOTE & \textbf{0.999} & 0.991 & 0.999 & \textbf{0.997} & 0.994 & \textbf{1.000} & \textbf{1.000} & \textbf{1.000} \\
+        KMeans SMOTE & N/A & N/A & N/A & N/A & N/A & N/A & N/A & N/A \\
+        ADASYN & 0.998 & 0.991 & 0.997 & 0.995 & 0.994 & 1.000 & 1.000 & 1.000 \\
+        Random Undersampling & 0.996 & 0.882 & 0.999 & 0.969 & 0.936 & 0.995 & 1.000 & 1.000 \\
+        CNN & N/A & N/A & N/A & N/A & N/A & N/A & N/A & N/A \\
+        ENN & N/A & N/A & N/A & N/A & N/A & N/A & N/A & N/A \\
+        Repeated ENN & 0.999 & 0.981 & 0.999 & 0.991 & 0.989 & 0.999 & 1.000 & 0.999 \\
+        All KNN & 0.999 & 0.984 & 0.998 & 0.993 & 0.990 & 1.000 & 1.000 & 1.000 \\
+        Near Miss & 0.984 & 0.585 & 0.999 & 0.987 & 0.753 & 0.997 & 1.000 & 1.000 \\
+        Tomek Links & 0.998 & 0.995 & 0.996 & 0.996 & \textbf{0.996} & 1.000 & 1.000 & 1.000 \\
+        One-Sided Selection & 0.996 & 0.991 & 0.993 & 0.992 & 0.991 & 0.999 & 1.000 & 1.000 \\
+        NCL & 0.998 & 0.984 & 0.997 & 0.993 & 0.990 & 0.999 & 1.000 & 0.999 \\
+        Cluster Centroids & 0.999 & 0.989 & \textbf{1.000} & 0.996 & 0.993 & 1.000 & 1.000 & 1.000 \\
+    \end{tabularx}
+    \vspace{1mm}
+    \caption{\textbf{Dataset Relevant Images.}}
+\end{table}

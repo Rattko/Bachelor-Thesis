@@ -1,0 +1,27 @@
+\begin{table}[H]
+    \centering
+    \setlength\tabcolsep{2pt}
+    \begin{tabularx}{\textwidth}{lRRRRRRRR}
+        & B. Accuracy & Precision & Recall & F1 Max & MCC & PR AUC & ROC AUC & P-ROC AUC \\
+        \midrule
+        Baseline & 0.945 & \textbf{0.966} & 0.891 & 0.929 & 0.924 & 0.982 & 0.998 & 0.988 \\
+        Random Oversampling & 0.952 & 0.888 & 0.910 & 0.908 & 0.893 & 0.851 & 0.953 & 0.953 \\
+        SMOTE & 0.950 & 0.964 & 0.902 & 0.933 & \textbf{0.929} & 0.981 & 0.998 & 0.998 \\
+        Borderline SMOTE & 0.951 & 0.963 & 0.905 & \textbf{0.934} & 0.928 & 0.982 & 0.998 & 0.998 \\
+        SVM SMOTE & 0.950 & 0.962 & 0.902 & 0.931 & 0.927 & 0.982 & 0.999 & \textbf{0.999} \\
+        KMeans SMOTE & N/A & N/A & N/A & N/A & N/A & N/A & N/A & N/A \\
+        ADASYN & 0.948 & 0.959 & 0.898 & 0.930 & 0.924 & 0.982 & 0.998 & 0.998 \\
+        Random Undersampling & \textbf{0.978} & 0.716 & 0.985 & 0.902 & 0.827 & 0.972 & 0.998 & 0.998 \\
+        CNN & N/A & N/A & N/A & N/A & N/A & N/A & N/A & N/A \\
+        ENN & 0.954 & 0.963 & 0.914 & 0.925 & 0.920 & 0.982 & 0.998 & 0.988 \\
+        Repeated ENN & 0.970 & 0.961 & 0.948 & 0.929 & 0.924 & 0.983 & \textbf{0.999} & 0.989 \\
+        All KNN & 0.962 & 0.957 & 0.933 & 0.930 & 0.924 & \textbf{0.983} & 0.999 & 0.989 \\
+        Near Miss & 0.813 & 0.134 & \textbf{0.993} & 0.777 & 0.288 & 0.720 & 0.948 & 0.948 \\
+        Tomek Links & 0.944 & 0.963 & 0.889 & 0.929 & 0.921 & 0.983 & 0.999 & 0.989 \\
+        One-Sided Selection & 0.943 & 0.960 & 0.889 & 0.924 & 0.920 & 0.982 & 0.999 & 0.989 \\
+        NCL & 0.959 & 0.940 & 0.923 & 0.925 & 0.919 & 0.981 & 0.998 & 0.989 \\
+        Cluster Centroids & N/A & N/A & N/A & N/A & N/A & N/A & N/A & N/A \\
+    \end{tabularx}
+    \vspace{1mm}
+    \caption{\textbf{Dataset UNSW-NB15.}}
+\end{table}

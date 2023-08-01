@@ -1,0 +1,27 @@
+\begin{table}[H]
+    \centering
+    \setlength\tabcolsep{2pt}
+    \begin{tabularx}{\textwidth}{lRRRRRRRR}
+        & B. Accuracy & Precision & Recall & F1 Max & MCC & PR AUC & ROC AUC & P-ROC AUC \\
+        \midrule
+        Baseline & 0.773 & \textbf{0.778} & 0.549 & 0.662 & \textbf{0.647} & 0.717 & 0.976 & 0.833 \\
+        Random Oversampling & 0.883 & 0.275 & 0.818 & 0.604 & 0.456 & 0.561 & 0.895 & 0.895 \\
+        SMOTE & 0.844 & 0.479 & 0.715 & 0.591 & 0.567 & 0.634 & 0.966 & 0.965 \\
+        Borderline SMOTE & 0.837 & 0.558 & 0.694 & 0.602 & 0.592 & 0.625 & 0.972 & 0.970 \\
+        SVM SMOTE & 0.835 & 0.541 & 0.688 & 0.602 & 0.592 & 0.623 & 0.971 & 0.969 \\
+        KMeans SMOTE & N/A & N/A & N/A & N/A & N/A & N/A & N/A & N/A \\
+        ADASYN & 0.842 & 0.417 & 0.718 & 0.579 & 0.527 & 0.618 & 0.963 & 0.961 \\
+        Random Undersampling & \textbf{0.927} & 0.240 & 0.930 & \textbf{0.677} & 0.449 & \textbf{0.738} & \textbf{0.979} & \textbf{0.979} \\
+        CNN & N/A & N/A & N/A & N/A & N/A & N/A & N/A & N/A \\
+        ENN & N/A & N/A & N/A & N/A & N/A & N/A & N/A & N/A \\
+        Repeated ENN & N/A & N/A & N/A & N/A & N/A & N/A & N/A & N/A \\
+        All KNN & 0.881 & 0.331 & 0.799 & 0.584 & 0.498 & 0.602 & 0.970 & 0.783 \\
+        Near Miss & 0.812 & 0.107 & \textbf{0.937} & 0.327 & 0.251 & 0.251 & 0.906 & 0.900 \\
+        Tomek Links & N/A & N/A & N/A & N/A & N/A & N/A & N/A & N/A \\
+        One-Sided Selection & N/A & N/A & N/A & N/A & N/A & N/A & N/A & N/A \\
+        NCL & 0.860 & 0.623 & 0.735 & 0.656 & 0.642 & 0.701 & 0.976 & 0.829 \\
+        Cluster Centroids & N/A & N/A & N/A & N/A & N/A & N/A & N/A & N/A \\
+    \end{tabularx}
+    \vspace{1mm}
+    \caption{\textbf{Dataset BNG - Solar Flare.}}
+\end{table}

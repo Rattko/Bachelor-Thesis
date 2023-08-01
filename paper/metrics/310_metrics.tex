@@ -1,0 +1,27 @@
+\begin{table}[H]
+    \centering
+    \setlength\tabcolsep{2pt}
+    \begin{tabularx}{\textwidth}{lRRRRRRRR}
+        & B. Accuracy & Precision & Recall & F1 Max & MCC & PR AUC & ROC AUC & P-ROC AUC \\
+        \midrule
+        Baseline & 0.768 & \textbf{0.875} & 0.538 & 0.723 & 0.681 & \textbf{0.790} & 0.967 & 0.867 \\
+        Random Oversampling & 0.829 & 0.867 & 0.662 & 0.736 & \textbf{0.716} & 0.675 & 0.911 & 0.911 \\
+        SMOTE & 0.879 & 0.633 & 0.769 & 0.716 & 0.690 & 0.769 & 0.975 & 0.973 \\
+        Borderline SMOTE & 0.886 & 0.695 & 0.785 & 0.699 & 0.678 & 0.771 & 0.975 & 0.975 \\
+        SVM SMOTE & 0.887 & 0.658 & 0.785 & 0.718 & 0.691 & 0.785 & \textbf{0.977} & \textbf{0.975} \\
+        KMeans SMOTE & N/A & N/A & N/A & N/A & N/A & N/A & N/A & N/A \\
+        ADASYN & 0.846 & 0.587 & 0.708 & 0.667 & 0.621 & 0.716 & 0.956 & 0.953 \\
+        Random Undersampling & \textbf{0.935} & 0.246 & 0.938 & \textbf{0.738} & 0.461 & 0.762 & 0.958 & 0.957 \\
+        CNN & 0.823 & 0.506 & 0.800 & 0.626 & 0.567 & 0.657 & 0.926 & 0.922 \\
+        ENN & 0.805 & 0.837 & 0.615 & 0.719 & 0.675 & 0.775 & 0.968 & 0.865 \\
+        Repeated ENN & 0.884 & 0.818 & 0.785 & 0.718 & 0.667 & 0.761 & 0.968 & 0.861 \\
+        All KNN & 0.863 & 0.787 & 0.738 & 0.708 & 0.663 & 0.734 & 0.967 & 0.854 \\
+        Near Miss & 0.717 & 0.047 & \textbf{0.954} & 0.571 & 0.132 & 0.550 & 0.900 & 0.900 \\
+        Tomek Links & 0.768 & 0.833 & 0.538 & 0.700 & 0.664 & 0.781 & 0.968 & 0.868 \\
+        One-Sided Selection & 0.760 & 0.829 & 0.523 & 0.714 & 0.653 & 0.767 & 0.967 & 0.862 \\
+        NCL & 0.848 & 0.760 & 0.708 & 0.692 & 0.660 & 0.747 & 0.971 & 0.862 \\
+        Cluster Centroids & 0.781 & 0.057 & \textbf{0.954} & 0.698 & 0.175 & 0.645 & 0.958 & 0.958 \\
+    \end{tabularx}
+    \vspace{1mm}
+    \caption{\textbf{Dataset Mammography.}}
+\end{table}
