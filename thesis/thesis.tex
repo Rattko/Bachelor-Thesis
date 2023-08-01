@@ -15,7 +15,7 @@
 % Useful packages
 \usepackage{algorithm}
 \usepackage{algpseudocode}
-\usepackage{amsmath, amsfonts}
+\usepackage{amsfonts, amsmath}
 \usepackage{booktabs}
 \usepackage{caption}
 \usepackage{microtype}
@@ -27,8 +27,12 @@
 % Load the bibliography file
 \addbibresource{refs.bib}
 
-\hypersetup{unicode}
-\hypersetup{breaklinks=true}
+% Customise the references
+\hypersetup{
+    unicode,
+    breaklinks=true,
+    hidelinks=true
+}
 
 \usepackage[noabbrev]{cleveref}
 
