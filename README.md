@@ -1,6 +1,8 @@
 # Bachelor Thesis at Charles University
 
-## Description - TODO
+## Description
+
+This repository contains everything related to my Bachelor thesis on benchmarking various preprocessing methods for imbalanced classification at Charles University, Prague. It also contains LaTex sources for the paper on the same topic published in the IEEE International Conference on Big Data.
 
 ## Quick Preview
 
@@ -14,7 +16,7 @@ The command downloads a pre-built [docker image](https://hub.docker.com/r/rattko
 
 ## Installation
 
-Unfortunately, one of our core dependencies does not support Windows operating system. Thus, we are forced to require either macOS or Linux operating system. We also use the new syntax for type hints requiring Python 3.10. Furthermore, [AutoSklearn](https://automl.github.io/auto-sklearn/master/index.html) requires [SWIG](https://www.swig.org). It can be installed using Homebrew on macOS or any package manager on Linux. Once these requirements have been met, we can obtain the source code and proceed with the installation. Run the following commands:
+Unfortunately, one of our core dependencies does not support the Windows operating system. Thus, we are forced to require either macOS or Linux operating system. We also use the new syntax for type hints requiring Python 3.10. Furthermore, [AutoSklearn](https://automl.github.io/auto-sklearn/master/index.html) requires [SWIG](https://www.swig.org). It can be installed using Homebrew on macOS or any package manager on Linux. Once these requirements have been met, we can obtain the source code and proceed with the installation. Run the following commands:
 
 ```zsh
 git clone git@github.com:Rattko/Bachelor-Thesis.git && cd Bachelor-Thesis
